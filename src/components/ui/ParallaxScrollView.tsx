@@ -1,24 +1,22 @@
 import type { PropsWithChildren, ReactElement } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, useColorScheme } from 'react-native';
 import Animated, {
   interpolate,
   useAnimatedRef,
   useAnimatedStyle,
+  useSharedValue,
   useScrollViewOffset,
 } from 'react-native-reanimated';
 
-import { ThemedView } from '@/components/ThemedView';
-import { useBottomTabOverflow } from '@/components/ui/TabBarBackground';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { ThemedView } from './ThemedView';
+import { useBottomTabOverflow } from './TabBarBackground';
 
-const HEADER_HEIGHT = 250;
-
-type Props = PropsWithChildren<{
+interface Props extends PropsWithChildren {
   headerImage: ReactElement;
   headerBackgroundColor: { dark: string; light: string };
-}>;
+}
 
-export default function ParallaxScrollView({
+export function ParallaxScrollView({
   children,
   headerImage,
   headerBackgroundColor,
@@ -33,12 +31,12 @@ export default function ParallaxScrollView({
         {
           translateY: interpolate(
             scrollOffset.value,
-            [-HEADER_HEIGHT, 0, HEADER_HEIGHT],
-            [-HEADER_HEIGHT / 2, 0, HEADER_HEIGHT * 0.75]
+            [-250, 0, 250],
+            [-125, 0, 187.5]
           ),
         },
         {
-          scale: interpolate(scrollOffset.value, [-HEADER_HEIGHT, 0, HEADER_HEIGHT], [2, 1, 1]),
+          scale: interpolate(scrollOffset.value, [-250, 0, 250], [2, 1, 1]),
         },
       ],
     };
@@ -70,7 +68,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    height: HEADER_HEIGHT,
+    height: 250,
     overflow: 'hidden',
   },
   content: {
