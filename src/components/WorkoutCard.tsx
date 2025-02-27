@@ -95,38 +95,54 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
   return (
     <View style={[
       styles.card,
-      { 
-        backgroundColor: isDark ? '#1f2937' : 'white',
+      {
         shadowColor: isDark ? '#000' : '#000',
       }
     ]}>
       <View style={styles.cardContent}>
         <View style={styles.leftContent}>
           <View style={styles.iconContainer}>
-            <Icon name="home" size={24} color="white" />
+            <Icon name="users" size={24} color="white" />
           </View>
           <View style={styles.textContent}>
             <Text style={[
               styles.cardTitle,
-              { color: isDark ? '#ffffff' : '#111827' }
-            ]}>{title}</Text>
+              { color: isDark ? 'white' : '#111827' }
+            ]}>
+              {title}
+            </Text>
             <Text style={[
               styles.cardSubtitle,
               { color: isDark ? '#9ca3af' : '#6b7280' }
-            ]}>{`${time} · ${location}`}</Text>
+            ]}>
+              {time} · {location}
+            </Text>
           </View>
         </View>
         <View style={styles.avatarsRow}>
-          {participants.map((participant, index) => (
-            <Image
+          {participants.slice(0, 3).map((participant, index) => (
+            <View
               key={participant.id}
-              source={{ uri: participant.avatar }}
               style={[
-                styles.avatarThumb,
-                { marginLeft: index > 0 ? -8 : 0, zIndex: participants.length - index }
+                styles.avatarContainer,
+                { marginLeft: index > 0 ? -12 : 0 }
               ]}
-            />
+            >
+              <Image
+                source={{ uri: participant.avatar }}
+                style={styles.avatarThumb}
+              />
+            </View>
           ))}
+          {participants.length > 3 && (
+            <View style={[styles.avatarContainer, { marginLeft: -12 }]}>
+              <View style={styles.moreAvatars}>
+                <Text style={styles.moreAvatarsText}>
+                  +{participants.length - 3}
+                </Text>
+              </View>
+            </View>
+          )}
         </View>
       </View>
     </View>
@@ -143,7 +159,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: '#111827', // gray-900
+    backgroundColor: '#111827',
     zIndex: 50,
   },
   scrollContainer: {
@@ -151,7 +167,7 @@ const styles = StyleSheet.create({
   },
   gradientHeader: {
     height: 256,
-    backgroundColor: 'rgba(220, 38, 38, 0.2)', // red-600/20
+    backgroundColor: 'rgba(220, 38, 38, 0.2)',
     padding: 16,
     paddingTop: 48,
   },
@@ -159,7 +175,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(17, 24, 39, 0.5)', // gray-800/50
+    backgroundColor: 'rgba(17, 24, 39, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -175,9 +191,85 @@ const styles = StyleSheet.create({
   },
   headerSubtitle: {
     fontSize: 16,
-    color: 'rgba(209, 213, 219, 0.8)', // gray-300
+    color: 'rgba(209, 213, 219, 0.8)',
     marginTop: 4,
   },
+  // Card View Styles
+  card: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    overflow: 'hidden',
+  },
+  cardContent: {
+    padding: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  leftContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 12,
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    backgroundColor: '#dc2626',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  textContent: {
+    flex: 1,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  cardSubtitle: {
+    fontSize: 14,
+    color: '#6b7280',
+    marginTop: 2,
+  },
+  avatarsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  avatarContainer: {
+    marginLeft: 0,
+  },
+  avatarThumb: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: 'white',
+    backgroundColor: '#f3f4f6',
+  },
+  moreAvatars: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#e5e7eb',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'white',
+  },
+  moreAvatarsText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#4b5563',
+  },
+  // Expanded View Styles
   participantsSection: {
     paddingVertical: 48,
     paddingHorizontal: 24,
@@ -222,7 +314,7 @@ const styles = StyleSheet.create({
   platformButton: {
     flex: 1,
     minWidth: 120,
-    backgroundColor: 'rgba(31, 41, 55, 0.8)', // gray-800
+    backgroundColor: 'rgba(31, 41, 55, 0.8)',
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
@@ -231,60 +323,6 @@ const styles = StyleSheet.create({
   platformButtonText: {
     color: 'white',
     fontSize: 16,
-  },
-
-  // Card View Styles
-  card: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  cardContent: {
-    padding: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  leftContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  iconContainer: {
-    width: 48,
-    height: 48,
-    backgroundColor: '#dc2626', // red-600
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  textContent: {
-    flex: 1,
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111827', // gray-900
-  },
-  cardSubtitle: {
-    fontSize: 14,
-    color: '#6b7280', // gray-500
-    marginTop: 2,
-  },
-  avatarsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  avatarThumb: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: 'white',
   },
 });
 
