@@ -23,41 +23,43 @@ const WorkoutFeed = () => {
   const isDark = colorScheme === 'dark';
 
   const handleWorkoutPress = (workout: Workout) => {
-    // Navigate to workout detail screen
     router.push({
       pathname: "/workout/[id]",
       params: { id: workout.id }
     });
   };
 
+  const formatDate = () => {
+    const today = new Date();
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${days[today.getDay()]} ${months[today.getMonth()]} ${today.getDate()}`;
+  };
+
   return (
     <View style={[
       styles.container, 
-      { backgroundColor: isDark ? '#111827' : '#f9fafb' }
+      { backgroundColor: isDark ? '#000000' : '#f9fafb' }
     ]}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
-        <View style={styles.header}>
-          <Text style={[
-            styles.title,
-            { color: isDark ? '#ffffff' : '#111827' }
-          ]}>Today's Workouts</Text>
-          <TouchableOpacity style={[
-            styles.createButton,
-            { backgroundColor: '#dc2626' }
-          ]}>
-            <Text style={styles.buttonText}>Add Workout</Text>
-          </TouchableOpacity>
+        {/* Today's Section */}
+        <View style={styles.dateSection}>
+          <Text style={[styles.dateLabel, { color: isDark ? '#666666' : '#6b7280' }]}>Today</Text>
+          <Text style={[styles.date, { color: isDark ? '#ffffff' : '#111827' }]}>{formatDate()}</Text>
         </View>
 
+        {/* Workouts List */}
         <View style={styles.workoutList}>
           {mockWorkouts.map((workout) => (
-            <TouchableOpacity 
-              key={workout.id} 
-              style={styles.workoutItem}
+            <TouchableOpacity
+              key={workout.id}
               onPress={() => handleWorkoutPress(workout)}
-              activeOpacity={0.7}
+              style={styles.workoutItem}
             >
-              <WorkoutCard {...workout} isDark={isDark} />
+              <WorkoutCard
+                {...workout}
+                isDark={isDark}
+              />
             </TouchableOpacity>
           ))}
         </View>
@@ -74,34 +76,31 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 16,
-    paddingTop: 60,
+    paddingTop: 85,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  createButton: {
+  dateSection: {
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
+    paddingBottom: 8,
   },
-  buttonText: {
-    color: 'white',
-    fontWeight: '600',
+  dateLabel: {
+    fontSize: 13,
+    fontWeight: '500',
+    letterSpacing: -0.2,
+    marginBottom: 4,
+    textTransform: 'uppercase',
+  },
+  date: {
+    fontSize: 26,
+    fontWeight: '700',
+    letterSpacing: -0.5,
   },
   workoutList: {
-    gap: 16,
+    paddingTop: 24,              // More space after the date header
+    gap: 1,                      // Minimal gap since cards have internal padding
   },
   workoutItem: {
-    marginBottom: 16,
+    marginBottom: 0,             // Remove bottom margin since we're using gap
   },
 });
 
-export default WorkoutFeed; 
+export default WorkoutFeed;

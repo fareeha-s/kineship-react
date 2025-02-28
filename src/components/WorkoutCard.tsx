@@ -21,6 +21,35 @@ interface WorkoutCardProps {
   isDark?: boolean;
 }
 
+const getBrandStyles = (location: string, isDark: boolean) => {
+  if (location.includes("Barry's")) {
+    return {
+      gradient: isDark 
+        ? ['rgba(220, 38, 38, 0.2)', 'rgba(220, 38, 38, 0.05)']
+        : ['rgba(220, 38, 38, 0.1)', 'rgba(220, 38, 38, 0.02)'],
+      icon: '🏃‍♂️',
+      iconBg: isDark ? 'rgba(220, 38, 38, 0.3)' : 'rgba(220, 38, 38, 0.1)',
+    };
+  }
+  if (location.includes('SoulCycle')) {
+    return {
+      gradient: isDark
+        ? ['rgba(255, 226, 0, 0.15)', 'rgba(255, 226, 0, 0.02)']
+        : ['rgba(255, 226, 0, 0.1)', 'rgba(255, 226, 0, 0.02)'],
+      icon: '🚲',
+      iconBg: isDark ? 'rgba(255, 226, 0, 0.2)' : 'rgba(255, 226, 0, 0.15)',
+    };
+  }
+  // Default gradient
+  return {
+    gradient: isDark
+      ? ['rgba(99, 102, 241, 0.15)', 'rgba(99, 102, 241, 0.02)']
+      : ['rgba(99, 102, 241, 0.1)', 'rgba(99, 102, 241, 0.02)'],
+    icon: '💪',
+    iconBg: isDark ? 'rgba(99, 102, 241, 0.2)' : 'rgba(99, 102, 241, 0.1)',
+  };
+};
+
 const WorkoutCard: React.FC<WorkoutCardProps> = ({
   id,
   title,
@@ -30,8 +59,212 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
   platforms,
   expanded = false,
   onBack,
-  isDark = false,
+  isDark,
 }) => {
+  const brandStyle = getBrandStyles(location, isDark);
+  const styles = StyleSheet.create({
+    // Expanded View Styles
+    expandedRoot: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: '#111827',
+      zIndex: 50,
+    },
+    scrollContainer: {
+      flex: 1,
+    },
+    gradientHeader: {
+      height: 256,
+      backgroundColor: brandStyle.gradient[0],
+      padding: 16,
+      paddingTop: 48,
+    },
+    backButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: 'rgba(17, 24, 39, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    headerContent: {
+      position: 'absolute',
+      bottom: 32,
+      left: 24,
+    },
+    headerTitle: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: 'white',
+    },
+    headerSubtitle: {
+      fontSize: 16,
+      color: 'rgba(209, 213, 219, 0.8)',
+      marginTop: 4,
+    },
+    // Card View Styles
+    card: {
+      marginHorizontal: 16,
+      marginVertical: 6,
+      paddingVertical: 20,
+      backgroundColor: brandStyle.gradient[0],
+      borderRadius: 16,
+      flexDirection: 'row',
+      alignItems: 'center',
+      shadowColor: isDark ? '#000' : '#fff',
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: isDark ? 0.2 : 0.15,
+      shadowRadius: 24,
+      borderWidth: 1,
+      borderColor: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.5)',
+    },
+    cardContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      minHeight: 64,
+      paddingRight: 8,
+      paddingLeft: 16,
+    },
+    leftContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+      gap: 12,
+    },
+    iconContainer: {
+      width: 44,
+      height: 44,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 0,
+      backgroundColor: brandStyle.iconBg,
+      shadowColor: isDark ? '#000' : brandStyle.gradient[0],
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.06,
+      shadowRadius: 8,
+      borderWidth: 1,
+      borderColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.2)',
+    },
+    textContent: {
+      flex: 1,
+      justifyContent: 'center',
+      paddingVertical: 4,
+    },
+    titleContainer: {
+      marginBottom: 4,
+    },
+    subtitleContainer: {
+      paddingVertical: 2,
+    },
+    cardTitle: {
+      fontSize: 17,
+      fontWeight: '600',
+      letterSpacing: -0.4,
+      color: isDark ? 'rgba(243, 244, 246, 0.98)' : 'rgba(0, 0, 0, 0.8)',
+    },
+    cardSubtitle: {
+      fontSize: 15,
+      letterSpacing: -0.2,
+      opacity: 0.7,
+      color: isDark ? 'rgba(209, 213, 219, 0.7)' : 'rgba(102, 102, 102, 0.75)',
+    },
+    avatarsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    avatarContainer: {
+      marginLeft: -6,
+    },
+    avatarThumb: {
+      width: 26,
+      height: 26,
+      borderRadius: 13,
+      borderWidth: 2,
+      borderColor: isDark ? '#000000' : '#ffffff',
+    },
+    moreAvatars: {
+      width: 26,
+      height: 26,
+      borderRadius: 13,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 2,
+      borderColor: isDark ? '#000000' : '#ffffff',
+      backgroundColor: isDark ? '#374151' : '#E5E7EB',
+    },
+    moreAvatarsText: {
+      fontSize: 11,
+      fontWeight: '600',
+      letterSpacing: -0.1,
+      color: isDark ? '#F3F4F6' : '#4B5563',
+    },
+    // Expanded View Styles
+    participantsSection: {
+      paddingVertical: 48,
+      paddingHorizontal: 24,
+    },
+    participantsRow: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      gap: 32,
+    },
+    participantItem: {
+      alignItems: 'center',
+    },
+    participantAvatarContainer: {
+      padding: 4,
+    },
+    participantAvatar: {
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      borderWidth: 2,
+      borderColor: 'white',
+    },
+    participantName: {
+      color: 'white',
+      marginTop: 8,
+      fontSize: 14,
+    },
+    platformsSection: {
+      padding: 24,
+    },
+    platformsTitle: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: 'white',
+      marginBottom: 16,
+    },
+    platformsGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 12,
+    },
+    platformButton: {
+      flex: 1,
+      minWidth: 120,
+      backgroundColor: 'rgba(31, 41, 55, 0.8)',
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 8,
+      alignItems: 'center',
+    },
+    platformButtonText: {
+      color: 'white',
+      fontSize: 16,
+    },
+  });
+
   if (expanded) {
     return (
       <View style={styles.expandedRoot}>
@@ -93,30 +326,23 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
   }
 
   return (
-    <View style={[
-      styles.card,
-      {
-        shadowColor: isDark ? '#000' : '#000',
-      }
-    ]}>
+    <View style={styles.card}>
       <View style={styles.cardContent}>
         <View style={styles.leftContent}>
           <View style={styles.iconContainer}>
-            <Icon name="users" size={24} color="white" />
+            <Text style={{ fontSize: 20 }}>{brandStyle.icon}</Text>
           </View>
           <View style={styles.textContent}>
-            <Text style={[
-              styles.cardTitle,
-              { color: isDark ? 'white' : '#111827' }
-            ]}>
-              {title}
-            </Text>
-            <Text style={[
-              styles.cardSubtitle,
-              { color: isDark ? '#9ca3af' : '#6b7280' }
-            ]}>
-              {time} · {location}
-            </Text>
+            <View style={styles.titleContainer}>
+              <Text style={styles.cardTitle}>
+                {title}
+              </Text>
+            </View>
+            <View style={styles.subtitleContainer}>
+              <Text style={styles.cardSubtitle}>
+                {time} · {location.includes("Barry's") ? `${location} Castro` : location}
+              </Text>
+            </View>
           </View>
         </View>
         <View style={styles.avatarsRow}>
@@ -125,7 +351,7 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
               key={participant.id}
               style={[
                 styles.avatarContainer,
-                { marginLeft: index > 0 ? -12 : 0 }
+                { marginLeft: index > 0 ? -6 : 0 }
               ]}
             >
               <Image
@@ -135,7 +361,7 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
             </View>
           ))}
           {participants.length > 3 && (
-            <View style={[styles.avatarContainer, { marginLeft: -12 }]}>
+            <View style={[styles.avatarContainer, { marginLeft: -6 }]}>
               <View style={styles.moreAvatars}>
                 <Text style={styles.moreAvatarsText}>
                   +{participants.length - 3}
@@ -148,182 +374,5 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
     </View>
   );
 };
-
-const { width } = Dimensions.get('window');
-
-const styles = StyleSheet.create({
-  // Expanded View Styles
-  expandedRoot: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: '#111827',
-    zIndex: 50,
-  },
-  scrollContainer: {
-    flex: 1,
-  },
-  gradientHeader: {
-    height: 256,
-    backgroundColor: 'rgba(220, 38, 38, 0.2)',
-    padding: 16,
-    paddingTop: 48,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(17, 24, 39, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerContent: {
-    position: 'absolute',
-    bottom: 32,
-    left: 24,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    color: 'rgba(209, 213, 219, 0.8)',
-    marginTop: 4,
-  },
-  // Card View Styles
-  card: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    overflow: 'hidden',
-  },
-  cardContent: {
-    padding: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  leftContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    marginRight: 12,
-  },
-  iconContainer: {
-    width: 48,
-    height: 48,
-    backgroundColor: '#dc2626',
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  textContent: {
-    flex: 1,
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  cardSubtitle: {
-    fontSize: 14,
-    color: '#6b7280',
-    marginTop: 2,
-  },
-  avatarsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  avatarContainer: {
-    marginLeft: 0,
-  },
-  avatarThumb: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: 'white',
-    backgroundColor: '#f3f4f6',
-  },
-  moreAvatars: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#e5e7eb',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'white',
-  },
-  moreAvatarsText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#4b5563',
-  },
-  // Expanded View Styles
-  participantsSection: {
-    paddingVertical: 48,
-    paddingHorizontal: 24,
-  },
-  participantsRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 32,
-  },
-  participantItem: {
-    alignItems: 'center',
-  },
-  participantAvatarContainer: {
-    padding: 4,
-  },
-  participantAvatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    borderWidth: 2,
-    borderColor: 'white',
-  },
-  participantName: {
-    color: 'white',
-    marginTop: 8,
-    fontSize: 14,
-  },
-  platformsSection: {
-    padding: 24,
-  },
-  platformsTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: 'white',
-    marginBottom: 16,
-  },
-  platformsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  platformButton: {
-    flex: 1,
-    minWidth: 120,
-    backgroundColor: 'rgba(31, 41, 55, 0.8)',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  platformButtonText: {
-    color: 'white',
-    fontSize: 16,
-  },
-});
 
 export default WorkoutCard;
