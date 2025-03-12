@@ -48,6 +48,14 @@ export default function RootLayout() {
             }}
           />
           <Stack.Screen 
+            name="calendar" 
+            options={{
+              headerShown: true,
+              title: "Calendar",
+              headerTintColor: "#dc2626"
+            }}
+          />
+          <Stack.Screen 
             name="(tabs)" 
             options={{
               headerShown: false

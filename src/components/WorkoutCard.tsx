@@ -1,6 +1,7 @@
 // src/components/WorkoutCard.tsx
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions, ScrollView } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions, ScrollView, Animated } from 'react-native';
+import { BlurView } from 'expo-blur';
 import Icon from 'react-native-vector-icons/Feather';
 
 interface Participant {
@@ -25,28 +26,31 @@ const getBrandStyles = (location: string, isDark: boolean) => {
   if (location.includes("Barry's")) {
     return {
       gradient: isDark 
-        ? ['rgba(220, 38, 38, 0.2)', 'rgba(220, 38, 38, 0.05)']
-        : ['rgba(220, 38, 38, 0.1)', 'rgba(220, 38, 38, 0.02)'],
+        ? ['rgba(255, 59, 48, 0.15)', 'rgba(255, 59, 48, 0.05)']
+        : ['rgba(255, 59, 48, 0.08)', 'rgba(255, 59, 48, 0.02)'],
       icon: '🏃‍♂️',
-      iconBg: isDark ? 'rgba(220, 38, 38, 0.3)' : 'rgba(220, 38, 38, 0.1)',
+      iconBg: isDark ? 'rgba(255, 59, 48, 0.2)' : 'rgba(255, 59, 48, 0.08)',
+      tint: isDark ? 'rgba(255, 59, 48, 0.8)' : 'rgba(255, 59, 48, 1)',
     };
   }
   if (location.includes('SoulCycle')) {
     return {
       gradient: isDark
-        ? ['rgba(255, 226, 0, 0.15)', 'rgba(255, 226, 0, 0.02)']
-        : ['rgba(255, 226, 0, 0.1)', 'rgba(255, 226, 0, 0.02)'],
+        ? ['rgba(255, 204, 0, 0.12)', 'rgba(255, 204, 0, 0.02)']
+        : ['rgba(255, 204, 0, 0.08)', 'rgba(255, 204, 0, 0.02)'],
       icon: '🚲',
-      iconBg: isDark ? 'rgba(255, 226, 0, 0.2)' : 'rgba(255, 226, 0, 0.15)',
+      iconBg: isDark ? 'rgba(255, 204, 0, 0.15)' : 'rgba(255, 204, 0, 0.1)',
+      tint: isDark ? 'rgba(255, 204, 0, 0.8)' : 'rgba(255, 204, 0, 1)',
     };
   }
-  // Default gradient
+  // Default gradient - using iOS blue
   return {
     gradient: isDark
-      ? ['rgba(99, 102, 241, 0.15)', 'rgba(99, 102, 241, 0.02)']
-      : ['rgba(99, 102, 241, 0.1)', 'rgba(99, 102, 241, 0.02)'],
+      ? ['rgba(10, 132, 255, 0.12)', 'rgba(10, 132, 255, 0.02)']
+      : ['rgba(10, 132, 255, 0.08)', 'rgba(10, 132, 255, 0.02)'],
     icon: '💪',
-    iconBg: isDark ? 'rgba(99, 102, 241, 0.2)' : 'rgba(99, 102, 241, 0.1)',
+    iconBg: isDark ? 'rgba(10, 132, 255, 0.15)' : 'rgba(10, 132, 255, 0.08)',
+    tint: isDark ? 'rgba(10, 132, 255, 0.8)' : 'rgba(10, 132, 255, 1)',
   };
 };
 
@@ -61,7 +65,17 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
   onBack,
   isDark,
 }) => {
-  const brandStyle = getBrandStyles(location, isDark);
+  const brandStyle = getBrandStyles(location, isDark ?? false);
+  const animatedOpacity = React.useRef(new Animated.Value(0)).current;
+  
+  React.useEffect(() => {
+    Animated.timing(animatedOpacity, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+  
   const styles = StyleSheet.create({
     // Expanded View Styles
     expandedRoot: {
@@ -70,180 +84,180 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: '#111827',
+      backgroundColor: isDark ? '#000000' : '#FFFFFF',
       zIndex: 50,
     },
     scrollContainer: {
       flex: 1,
     },
     gradientHeader: {
-      height: 256,
+      height: 220,
       backgroundColor: brandStyle.gradient[0],
       padding: 16,
       paddingTop: 48,
     },
     backButton: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      backgroundColor: 'rgba(17, 24, 39, 0.5)',
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: isDark ? 'rgba(30, 30, 30, 0.7)' : 'rgba(250, 250, 250, 0.7)',
       justifyContent: 'center',
       alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
     },
     headerContent: {
       position: 'absolute',
-      bottom: 32,
+      bottom: 24,
       left: 24,
     },
     headerTitle: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      color: 'white',
+      fontSize: 28,
+      fontWeight: '600', 
+      letterSpacing: -0.5,
+      color: isDark ? 'white' : '#000000',
     },
     headerSubtitle: {
-      fontSize: 16,
-      color: 'rgba(209, 213, 219, 0.8)',
+      fontSize: 17,
+      fontWeight: '400', 
+      color: isDark ? 'rgba(235, 235, 245, 0.6)' : 'rgba(60, 60, 67, 0.6)',
       marginTop: 4,
     },
     // Card View Styles
     card: {
       marginHorizontal: 16,
-      marginVertical: 6,
-      paddingVertical: 20,
-      backgroundColor: brandStyle.gradient[0],
+      marginVertical: 8,
       borderRadius: 16,
-      flexDirection: 'row',
-      alignItems: 'center',
-      shadowColor: isDark ? '#000' : '#fff',
+      overflow: 'hidden',
+      backgroundColor: isDark ? 'rgba(30, 30, 30, 0.7)' : 'rgba(255, 255, 255, 0.7)',
+      shadowColor: isDark ? '#000' : '#000',
       shadowOffset: {
         width: 0,
         height: 2,
       },
-      shadowOpacity: isDark ? 0.2 : 0.15,
-      shadowRadius: 24,
-      borderWidth: 1,
-      borderColor: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.5)',
+      shadowOpacity: isDark ? 0.2 : 0.08,
+      shadowRadius: 8,
+      elevation: 2,
     },
     cardContent: {
       flexDirection: 'row',
       alignItems: 'center',
-      minHeight: 64,
-      paddingRight: 8,
-      paddingLeft: 16,
+      padding: 16,
     },
     leftContent: {
       flexDirection: 'row',
       alignItems: 'center',
       flex: 1,
-      gap: 12,
+      gap: 14,
     },
     iconContainer: {
-      width: 44,
-      height: 44,
+      width: 40,
+      height: 40,
       borderRadius: 12,
       alignItems: 'center',
       justifyContent: 'center',
-      marginRight: 0,
       backgroundColor: brandStyle.iconBg,
-      shadowColor: isDark ? '#000' : brandStyle.gradient[0],
+      shadowColor: brandStyle.tint,
       shadowOffset: {
         width: 0,
-        height: 2,
+        height: 1,
       },
-      shadowOpacity: 0.06,
-      shadowRadius: 8,
-      borderWidth: 1,
-      borderColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.2)',
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
     },
     textContent: {
       flex: 1,
       justifyContent: 'center',
-      paddingVertical: 4,
     },
     titleContainer: {
       marginBottom: 4,
     },
-    subtitleContainer: {
-      paddingVertical: 2,
-    },
     cardTitle: {
-      fontSize: 17,
-      fontWeight: '600',
-      letterSpacing: -0.4,
-      color: isDark ? 'rgba(243, 244, 246, 0.98)' : 'rgba(0, 0, 0, 0.8)',
+      fontSize: 17, 
+      fontWeight: '500', 
+      letterSpacing: -0.24, 
+      color: isDark ? 'rgba(255, 255, 255, 0.95)' : 'rgba(0, 0, 0, 0.85)',
     },
     cardSubtitle: {
-      fontSize: 15,
-      letterSpacing: -0.2,
-      opacity: 0.7,
-      color: isDark ? 'rgba(209, 213, 219, 0.7)' : 'rgba(102, 102, 102, 0.75)',
+      fontSize: 15, 
+      fontWeight: '400', 
+      letterSpacing: -0.24,
+      color: isDark ? 'rgba(235, 235, 245, 0.6)' : 'rgba(60, 60, 67, 0.6)', 
     },
     avatarsRow: {
       flexDirection: 'row',
       alignItems: 'center',
+      marginLeft: 8,
     },
     avatarContainer: {
-      marginLeft: -6,
+      marginLeft: -8,
     },
     avatarThumb: {
-      width: 26,
-      height: 26,
-      borderRadius: 13,
+      width: 28,
+      height: 28,
+      borderRadius: 14,
       borderWidth: 2,
-      borderColor: isDark ? '#000000' : '#ffffff',
+      borderColor: isDark ? 'rgba(30, 30, 30, 0.7)' : 'rgba(255, 255, 255, 0.9)',
     },
     moreAvatars: {
-      width: 26,
-      height: 26,
-      borderRadius: 13,
+      width: 28,
+      height: 28,
+      borderRadius: 14,
       alignItems: 'center',
       justifyContent: 'center',
       borderWidth: 2,
-      borderColor: isDark ? '#000000' : '#ffffff',
-      backgroundColor: isDark ? '#374151' : '#E5E7EB',
+      borderColor: isDark ? 'rgba(30, 30, 30, 0.7)' : 'rgba(255, 255, 255, 0.9)',
+      backgroundColor: isDark ? 'rgba(60, 60, 67, 0.6)' : 'rgba(60, 60, 67, 0.18)',
     },
     moreAvatarsText: {
-      fontSize: 11,
-      fontWeight: '600',
-      letterSpacing: -0.1,
-      color: isDark ? '#F3F4F6' : '#4B5563',
+      fontSize: 12,
+      fontWeight: '500', 
+      color: isDark ? 'rgba(255, 255, 255, 0.95)' : 'rgba(0, 0, 0, 0.85)',
     },
     // Expanded View Styles
     participantsSection: {
-      paddingVertical: 48,
+      paddingVertical: 32,
       paddingHorizontal: 24,
+    },
+    sectionTitle: {
+      fontSize: 20, 
+      fontWeight: '600', 
+      letterSpacing: -0.5,
+      color: isDark ? 'white' : '#000000',
+      marginBottom: 16,
     },
     participantsRow: {
       flexDirection: 'row',
       justifyContent: 'center',
-      gap: 32,
+      flexWrap: 'wrap',
+      gap: 24,
     },
     participantItem: {
       alignItems: 'center',
+      width: 80,
     },
     participantAvatarContainer: {
       padding: 4,
     },
     participantAvatar: {
-      width: 64,
-      height: 64,
-      borderRadius: 32,
+      width: 60,
+      height: 60,
+      borderRadius: 30,
       borderWidth: 2,
-      borderColor: 'white',
+      borderColor: isDark ? 'rgba(60, 60, 67, 0.3)' : 'rgba(255, 255, 255, 0.9)',
     },
     participantName: {
-      color: 'white',
+      color: isDark ? 'rgba(255, 255, 255, 0.95)' : 'rgba(0, 0, 0, 0.85)',
       marginTop: 8,
       fontSize: 14,
+      fontWeight: '500', 
+      textAlign: 'center',
     },
     platformsSection: {
       padding: 24,
-    },
-    platformsTitle: {
-      fontSize: 18,
-      fontWeight: '600',
-      color: 'white',
-      marginBottom: 16,
+      paddingTop: 0,
     },
     platformsGrid: {
       flexDirection: 'row',
@@ -253,29 +267,35 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
     platformButton: {
       flex: 1,
       minWidth: 120,
-      backgroundColor: 'rgba(31, 41, 55, 0.8)',
+      backgroundColor: isDark ? 'rgba(60, 60, 67, 0.3)' : 'rgba(242, 242, 247, 0.9)',
       paddingVertical: 12,
       paddingHorizontal: 16,
-      borderRadius: 8,
+      borderRadius: 12,
       alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: isDark ? 0.2 : 0.05,
+      shadowRadius: 2,
     },
     platformButtonText: {
-      color: 'white',
+      color: isDark ? 'white' : '#000000',
       fontSize: 16,
+      fontWeight: '500', 
     },
   });
 
   if (expanded) {
     return (
       <View style={styles.expandedRoot}>
-        <ScrollView style={styles.scrollContainer}>
+        <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
           {/* Header with gradient */}
           <View style={styles.gradientHeader}>
             <TouchableOpacity 
               onPress={onBack}
               style={styles.backButton}
+              activeOpacity={0.7}
             >
-              <Icon name="chevron-left" size={24} color="white" />
+              <Icon name="chevron-left" size={22} color={isDark ? 'white' : '#000000'} />
             </TouchableOpacity>
             
             <View style={styles.headerContent}>
@@ -286,6 +306,7 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
 
           {/* Participants */}
           <View style={styles.participantsSection}>
+            <Text style={styles.sectionTitle}>Participants</Text>
             <View style={styles.participantsRow}>
               {participants.map((participant) => (
                 <View 
@@ -308,12 +329,13 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
 
           {/* Join buttons */}
           <View style={styles.platformsSection}>
-            <Text style={styles.platformsTitle}>Join in through:</Text>
+            <Text style={styles.sectionTitle}>Join through</Text>
             <View style={styles.platformsGrid}>
               {platforms.map((platform) => (
                 <TouchableOpacity
                   key={platform}
                   style={styles.platformButton}
+                  activeOpacity={0.7}
                 >
                   <Text style={styles.platformButtonText}>{platform}</Text>
                 </TouchableOpacity>
@@ -326,52 +348,52 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
   }
 
   return (
-    <View style={styles.card}>
-      <View style={styles.cardContent}>
-        <View style={styles.leftContent}>
-          <View style={styles.iconContainer}>
-            <Text style={{ fontSize: 20 }}>{brandStyle.icon}</Text>
-          </View>
-          <View style={styles.textContent}>
-            <View style={styles.titleContainer}>
-              <Text style={styles.cardTitle}>
-                {title}
-              </Text>
+    <Animated.View style={[styles.card, { opacity: animatedOpacity }]}>
+      <BlurView intensity={isDark ? 20 : 50} tint={isDark ? 'dark' : 'light'} style={{ flex: 1 }}>
+        <View style={styles.cardContent}>
+          <View style={styles.leftContent}>
+            <View style={styles.iconContainer}>
+              <Text style={{ fontSize: 18 }}>{brandStyle.icon}</Text>
             </View>
-            <View style={styles.subtitleContainer}>
+            <View style={styles.textContent}>
+              <View style={styles.titleContainer}>
+                <Text style={styles.cardTitle}>
+                  {title}
+                </Text>
+              </View>
               <Text style={styles.cardSubtitle}>
                 {time} · {location.includes("Barry's") ? `${location} Castro` : location}
               </Text>
             </View>
           </View>
-        </View>
-        <View style={styles.avatarsRow}>
-          {participants.slice(0, 3).map((participant, index) => (
-            <View
-              key={participant.id}
-              style={[
-                styles.avatarContainer,
-                { marginLeft: index > 0 ? -6 : 0 }
-              ]}
-            >
-              <Image
-                source={{ uri: participant.avatar }}
-                style={styles.avatarThumb}
-              />
-            </View>
-          ))}
-          {participants.length > 3 && (
-            <View style={[styles.avatarContainer, { marginLeft: -6 }]}>
-              <View style={styles.moreAvatars}>
-                <Text style={styles.moreAvatarsText}>
-                  +{participants.length - 3}
-                </Text>
+          <View style={styles.avatarsRow}>
+            {participants.slice(0, 3).map((participant, index) => (
+              <View
+                key={participant.id}
+                style={[
+                  styles.avatarContainer,
+                  { marginLeft: index > 0 ? -8 : 0 }
+                ]}
+              >
+                <Image
+                  source={{ uri: participant.avatar }}
+                  style={styles.avatarThumb}
+                />
               </View>
-            </View>
-          )}
+            ))}
+            {participants.length > 3 && (
+              <View style={[styles.avatarContainer, { marginLeft: -8 }]}>
+                <View style={styles.moreAvatars}>
+                  <Text style={styles.moreAvatarsText}>
+                    +{participants.length - 3}
+                  </Text>
+                </View>
+              </View>
+            )}
+          </View>
         </View>
-      </View>
-    </View>
+      </BlurView>
+    </Animated.View>
   );
 };
 
