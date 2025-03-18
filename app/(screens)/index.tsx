@@ -16,7 +16,7 @@ const WorkoutFeed = () => {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
-  const { formattedWorkouts, loading: calendarLoading, error, hasPermission, refreshWorkouts, currentEndDate } = useCalendar();
+  const { formattedWorkouts, loading: calendarLoading, error, hasPermission, refreshWorkouts } = useCalendar();
   const [showCalendarWorkouts, setShowCalendarWorkouts] = useState(false);
   const [calendarInitialized, setCalendarInitialized] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -205,18 +205,56 @@ const WorkoutFeed = () => {
             </View>
           ))}
           
-          {/* Load More Button */}
-          {showCalendarWorkouts && calendarInitialized && (
-            <TouchableOpacity 
-              style={[styles.loadMoreButton, loading && styles.loadMoreButtonDisabled]}
-              onPress={() => refreshWorkouts(true)}
-              disabled={loading}
-            >
-              <Text style={styles.loadMoreButtonText}>
-                {loading ? 'Loading...' : 'Load More Workouts'}
-              </Text>
-              {loading && <ActivityIndicator size="small" color="white" style={styles.smallLoader} />}
-            </TouchableOpacity>
+          {/* Load More Button after 3 days */}
+          {showCalendarWorkouts && calendarInitialized && sortedDates.length > 0 && (
+            <View>
+              {sortedDates.slice(0, 3).map((date) => (
+                <View key={date} style={styles.dateSection}>
+                  <Text style={[styles.dateLabel, isDark && { color: '#fff' }]}>
+                    {date}
+                  </Text>
+                  {workoutsByDate[date].map((workout) => (
+                    <TouchableOpacity
+                      key={workout.id}
+                      onPress={() => handleWorkoutPress(workout)}
+                      style={styles.workoutItem}
+                    >
+                      <WorkoutCard {...workout} />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              ))}
+              
+              {/* Load More Button */}
+              <TouchableOpacity 
+                style={[styles.calendarButton, loading && styles.calendarButtonDisabled]}
+                onPress={() => refreshWorkouts(true)}
+                disabled={loading}
+              >
+                <Text style={styles.calendarButtonText}>
+                  {loading ? 'Loading...' : 'Load More Workouts'}
+                </Text>
+                {loading && <ActivityIndicator size="small" color="white" style={styles.smallLoader} />}
+              </TouchableOpacity>
+
+              {/* Remaining dates */}
+              {sortedDates.slice(3).map((date) => (
+                <View key={date} style={styles.dateSection}>
+                  <Text style={[styles.dateLabel, isDark && { color: '#fff' }]}>
+                    {date}
+                  </Text>
+                  {workoutsByDate[date].map((workout) => (
+                    <TouchableOpacity
+                      key={workout.id}
+                      onPress={() => handleWorkoutPress(workout)}
+                      style={styles.workoutItem}
+                    >
+                      <WorkoutCard {...workout} />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              ))}
+            </View>
           )}
         </View>
       </ScrollView>
@@ -228,25 +266,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  loadMoreButton: {
-    backgroundColor: '#4F46E5',
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 16,
-    marginBottom: 24,
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  loadMoreButtonDisabled: {
-    opacity: 0.7,
-  },
-  loadMoreButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-    marginRight: 8,
-  },
+
   scrollView: {
     flex: 1,
   },
