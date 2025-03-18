@@ -63,8 +63,18 @@ export const useCalendar = (): UseCalendarReturn => {
       setCurrentEndDate(endDate);
 
       const events = await calendarService.getCalendarEvents(startDate, endDate);
+      
+      // Ensure events is an array before mapping
+      if (!Array.isArray(events)) {
+        console.error('Events is not an array:', events);
+        return [];
+      }
+      
       const formatted = events.map(calendarService.formatWorkoutForCard);
       setFormattedWorkouts(formatted);
+      
+      // Log the formatted workouts for debugging
+      console.log('Returning formatted workouts:', formatted);
       return formatted;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch workouts');

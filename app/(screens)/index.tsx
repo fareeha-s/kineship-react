@@ -104,6 +104,12 @@ const WorkoutFeed = () => {
       // Fetch new workouts and get them directly
       const newWorkouts = await refreshWorkouts();
       
+      // Make sure we have an array of workouts
+      if (!Array.isArray(newWorkouts)) {
+        console.error('Expected array of workouts but got:', newWorkouts);
+        throw new Error('Failed to get workouts from calendar');
+      }
+      
       // Ensure all calendar workouts have proper dates before setting them
       const workoutsWithDates = newWorkouts.map((workout: any) => {
         if (!workout.date) {
