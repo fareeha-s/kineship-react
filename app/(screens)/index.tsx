@@ -91,13 +91,12 @@ const WorkoutFeed = () => {
   const handlePullCalendar = async () => {
     try {
       setLoading(true);
-      // Clear existing calendar workouts
-      setLocalCalendarWorkouts([]);
       
       // Ensure calendar workouts are shown
       setShowCalendarWorkouts(true);
       setCalendarInitialized(true);
       
+      // Fetch new workouts
       await refreshWorkouts();
       
       // Ensure all calendar workouts have proper dates before setting them
@@ -118,12 +117,12 @@ const WorkoutFeed = () => {
         date: w.date 
       })));
       
-      // Update with new workouts immediately after they're fetched
+      // Update with new workouts
       setLocalCalendarWorkouts(workoutsWithDates);
       
       // Show appropriate message based on results
-      if (formattedWorkouts.length > 0) {
-        Alert.alert('Success', `Found ${formattedWorkouts.length} calendar workouts`);
+      if (workoutsWithDates.length > 0) {
+        Alert.alert('Success', `Found ${workoutsWithDates.length} calendar workouts`);
       } else {
         Alert.alert('No Workouts Found', 'No workout events were found in your calendar. Try adding more specific workout names to your calendar events.');
       }
