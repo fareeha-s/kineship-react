@@ -148,6 +148,18 @@ const WorkoutFeed = () => {
       styles.container, 
       { backgroundColor: isDark ? '#000000' : '#f9fafb' }
     ]}>
+      {/* Calendar Pull Button (Fixed Position) */}
+      <TouchableOpacity 
+        style={[styles.calendarButton, loading && styles.calendarButtonDisabled]}
+        onPress={handlePullCalendar}
+        disabled={loading}
+      >
+        <Text style={styles.calendarButtonText}>
+          Pull from Calendar
+        </Text>
+        {loading && <ActivityIndicator size="small" color="white" style={styles.smallLoader} />}
+      </TouchableOpacity>
+
       <ScrollView 
         style={styles.scrollView} 
         contentContainerStyle={styles.content}
@@ -195,37 +207,7 @@ const WorkoutFeed = () => {
           <Text style={[styles.date, { color: isDark ? '#ffffff' : '#111827' }]}>{formatDate()}</Text>
         </View>
 
-        {/* Calendar Button */}
-        <TouchableOpacity 
-          style={[styles.calendarButton, loading && styles.calendarButtonDisabled]}
-          onPress={handlePullCalendar}
-          disabled={loading}
-        >
-          <Text style={styles.calendarButtonText}>
-            {calendarInitialized ? 'Refresh Calendar Workouts' : 'Pull Workouts from Calendar'}
-          </Text>
-          {loading && <ActivityIndicator size="small" color="white" style={styles.smallLoader} />}
-        </TouchableOpacity>
 
-        {/* Toggle Calendar Workouts (if initialized) */}
-        {calendarInitialized && hasPermission && (
-          <TouchableOpacity 
-            style={[
-              styles.toggleButton, 
-              showCalendarWorkouts && styles.toggleButtonActive
-            ]}
-            onPress={() => setShowCalendarWorkouts(!showCalendarWorkouts)}
-          >
-            <Text 
-              style={[
-                styles.toggleText,
-                showCalendarWorkouts && styles.toggleTextActive
-              ]}
-            >
-              {showCalendarWorkouts ? 'Hide Calendar Workouts' : 'Show Calendar Workouts'}
-            </Text>
-          </TouchableOpacity>
-        )}
 
         {/* Workouts List Grouped by Date */}
         <View style={styles.workoutList}>
@@ -313,7 +295,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingTop: 85,
+    paddingTop: 16,
     paddingHorizontal: 16,
   },
   dateSection: {
@@ -332,11 +314,14 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   calendarButton: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    zIndex: 1,
     backgroundColor: '#4b5563',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     borderRadius: 8,
-    marginBottom: 12,
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
@@ -344,7 +329,7 @@ const styles = StyleSheet.create({
   calendarButtonText: {
     color: 'white',
     fontWeight: '600',
-    fontSize: 16,
+    fontSize: 14,
   },
 
   toggleButton: {
