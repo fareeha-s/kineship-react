@@ -353,6 +353,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    backgroundColor: 'rgba(245, 245, 247, 0.8)', // Light background with slight transparency
   },
 
   scrollView: {
@@ -365,6 +366,7 @@ const styles = StyleSheet.create({
       default: 24
     }),
     paddingHorizontal: 16,
+    backgroundColor: 'rgba(245, 245, 247, 0.8)', // Light background with slight transparency
   },
   headerSection: {
     flexDirection: 'row',
@@ -487,11 +489,13 @@ const styles = StyleSheet.create({
   workoutList: {
     paddingTop: 8,
     gap: 1,
+    paddingBottom: 40, // Add padding at the bottom for better scrolling experience
   },
   workoutItem: {
-    marginBottom: 4, // Reduced from 8 to 4 for cards within same day
+    marginBottom: 16, // Increased for stacked effect
     alignSelf: 'flex-start',
     width: '100%',
+    transform: [{ perspective: 1000 }],
   },
   lastWorkoutItem: {
     marginBottom: 0, // No margin for last card in a day

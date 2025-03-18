@@ -114,6 +114,20 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
       bottom: 0,
       opacity: 0.1,
     },
+    headerBlur: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+    },
+    cardBlur: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+    },
     backButton: {
       width: 40,
       height: 40,
@@ -154,18 +168,20 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
     // Card View Styles
     card: {
       marginHorizontal: 16,
-      marginVertical: 8,
-      borderRadius: 16,
+      marginVertical: 12,
+      borderRadius: 20,
       overflow: 'hidden',
-      backgroundColor: isDark ? 'rgba(30, 30, 30, 0.7)' : 'rgba(255, 255, 255, 0.7)',
+      backgroundColor: isDark ? 'rgba(30, 30, 30, 0.65)' : 'rgba(255, 255, 255, 0.65)',
       shadowColor: isDark ? '#000' : '#000',
       shadowOffset: {
         width: 0,
-        height: 2,
+        height: 8,
       },
-      shadowOpacity: isDark ? 0.2 : 0.08,
-      shadowRadius: 8,
-      elevation: 2,
+      shadowOpacity: isDark ? 0.3 : 0.15,
+      shadowRadius: 12,
+      elevation: 5,
+      borderWidth: 1,
+      borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.5)',
     },
     cardContent: {
       flexDirection: 'row',
