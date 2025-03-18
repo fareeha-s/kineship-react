@@ -230,19 +230,19 @@ const WorkoutFeed = () => {
               />
             )}
 
-            {/* Dropdown Menu */}
+            {/* Centered Modal Menu */}
             {showMenu && (
               <View style={styles.menuContainer}>
                 <Animated.View 
                   style={[styles.menu, {
                     opacity: menuAnimation,
                     transform: [{
-                      translateY: menuAnimation.interpolate({
+                      scale: menuAnimation.interpolate({
                         inputRange: [0, 1],
-                        outputRange: [-20, 0]
+                        outputRange: [0.9, 1]
                       })
                     }],
-                    backgroundColor: isDark ? 'rgba(30, 41, 59, 0.85)' : 'rgba(255, 255, 255, 0.85)',
+                    backgroundColor: isDark ? 'rgba(30, 41, 59, 0.9)' : 'rgba(255, 255, 255, 0.9)',
                     borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'
                   }]}
                 >
@@ -380,8 +380,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   emojiText: {
-    fontSize: 24,
-    letterSpacing: 2,
+    fontSize: 36,
+    letterSpacing: 8,
+    textAlign: 'center',
+    marginTop: 10,
+    marginBottom: 10,
   },
   dateSection: {
     paddingBottom: 12,
@@ -419,40 +422,47 @@ const styles = StyleSheet.create({
   },
   menuContainer: {
     position: 'absolute',
-    top: 40,
+    top: 0,
+    left: 0,
     right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
     zIndex: 2,
   },
   menu: {
-    borderRadius: 12,
-    padding: 6,
+    borderRadius: 16,
+    padding: 8,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 8,
-    minWidth: 180,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 10,
+    width: '80%',
+    maxWidth: 300,
     borderWidth: 1,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginVertical: 2,
+    justifyContent: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    marginVertical: 6,
   },
   menuText: {
-    fontSize: 16,
-    fontWeight: '500',
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
   },
   overlay: {
     position: 'absolute',
-    top: -100,
-    left: -100,
-    right: -100,
-    bottom: -100,
-    backgroundColor: 'transparent',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
 
   toggleButton: {
