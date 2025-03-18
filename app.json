@@ -4,6 +4,7 @@
     "slug": "kineship-react",
     "version": "1.0.0",
     "plugins": [
+      ["expo-font"],
       [
         "expo-calendar",
         {
@@ -24,13 +25,15 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.kineship.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.kineship.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"

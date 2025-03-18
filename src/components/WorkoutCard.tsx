@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions, ScrollView, Animated } from 'react-native';
 import { BlurView } from 'expo-blur';
-import Icon from 'react-native-vector-icons/Feather';
+import { Feather, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 
 interface Participant {
   id: string;
@@ -63,9 +63,9 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
   platforms,
   expanded = false,
   onBack,
-  isDark,
+  isDark = false,
 }) => {
-  const brandStyle = getBrandStyles(location, isDark ?? false);
+  const brandStyle = getBrandStyles(location, isDark);
   const animatedOpacity = React.useRef(new Animated.Value(0)).current;
   
   React.useEffect(() => {
@@ -91,39 +91,57 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
       flex: 1,
     },
     gradientHeader: {
-      height: 220,
+      height: 260,
       backgroundColor: brandStyle.gradient[0],
       padding: 16,
       paddingTop: 48,
+      position: 'relative',
+      overflow: 'hidden',
+    },
+    headerPattern: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      opacity: 0.1,
     },
     backButton: {
-      width: 36,
-      height: 36,
-      borderRadius: 18,
-      backgroundColor: isDark ? 'rgba(30, 30, 30, 0.7)' : 'rgba(250, 250, 250, 0.7)',
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: isDark ? 'rgba(30, 30, 30, 0.8)' : 'rgba(250, 250, 250, 0.9)',
       justifyContent: 'center',
       alignItems: 'center',
       shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.1,
-      shadowRadius: 2,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.15,
+      shadowRadius: 4,
+      elevation: 3,
     },
     headerContent: {
       position: 'absolute',
-      bottom: 24,
+      bottom: 32,
       left: 24,
+      right: 24,
     },
     headerTitle: {
-      fontSize: 28,
-      fontWeight: '600', 
+      fontSize: 32,
+      fontWeight: '700', 
       letterSpacing: -0.5,
       color: isDark ? 'white' : '#000000',
+      marginBottom: 6,
+      textShadowColor: 'rgba(0, 0, 0, 0.1)',
+      textShadowOffset: { width: 0, height: 1 },
+      textShadowRadius: 2,
     },
     headerSubtitle: {
       fontSize: 17,
-      fontWeight: '400', 
-      color: isDark ? 'rgba(235, 235, 245, 0.6)' : 'rgba(60, 60, 67, 0.6)',
+      fontWeight: '500', 
+      color: isDark ? 'rgba(235, 235, 245, 0.8)' : 'rgba(60, 60, 67, 0.8)',
       marginTop: 4,
+      flexDirection: 'row',
+      alignItems: 'center',
     },
     // Card View Styles
     card: {
@@ -220,67 +238,92 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
     participantsSection: {
       paddingVertical: 32,
       paddingHorizontal: 24,
+      backgroundColor: isDark ? 'rgba(30, 30, 30, 0.5)' : 'rgba(250, 250, 250, 0.8)',
+      borderRadius: 24,
+      margin: 16,
+      marginTop: -30,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: isDark ? 0.3 : 0.1,
+      shadowRadius: 8,
+      elevation: 4,
     },
     sectionTitle: {
       fontSize: 20, 
-      fontWeight: '600', 
+      fontWeight: '700', 
       letterSpacing: -0.5,
       color: isDark ? 'white' : '#000000',
-      marginBottom: 16,
+      marginBottom: 20,
+      flexDirection: 'row',
+      alignItems: 'center',
     },
     participantsRow: {
       flexDirection: 'row',
-      justifyContent: 'center',
+      justifyContent: 'flex-start',
       flexWrap: 'wrap',
       gap: 24,
     },
     participantItem: {
       alignItems: 'center',
       width: 80,
+      marginBottom: 10,
     },
     participantAvatarContainer: {
       padding: 4,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 2,
     },
     participantAvatar: {
-      width: 60,
-      height: 60,
-      borderRadius: 30,
-      borderWidth: 2,
+      width: 70,
+      height: 70,
+      borderRadius: 35,
+      borderWidth: 3,
       borderColor: isDark ? 'rgba(60, 60, 67, 0.3)' : 'rgba(255, 255, 255, 0.9)',
     },
     participantName: {
       color: isDark ? 'rgba(255, 255, 255, 0.95)' : 'rgba(0, 0, 0, 0.85)',
-      marginTop: 8,
-      fontSize: 14,
-      fontWeight: '500', 
+      marginTop: 10,
+      fontSize: 15,
+      fontWeight: '600', 
       textAlign: 'center',
     },
     platformsSection: {
       padding: 24,
-      paddingTop: 0,
+      paddingTop: 8,
+      margin: 16,
+      marginTop: 0,
     },
     platformsGrid: {
       flexDirection: 'row',
       flexWrap: 'wrap',
-      gap: 12,
+      gap: 16,
     },
     platformButton: {
       flex: 1,
-      minWidth: 120,
+      minWidth: 140,
       backgroundColor: isDark ? 'rgba(60, 60, 67, 0.3)' : 'rgba(242, 242, 247, 0.9)',
-      paddingVertical: 12,
-      paddingHorizontal: 16,
-      borderRadius: 12,
+      paddingVertical: 16,
+      paddingHorizontal: 20,
+      borderRadius: 16,
+      height: 60,
       alignItems: 'center',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: isDark ? 0.2 : 0.05,
-      shadowRadius: 2,
+      justifyContent: 'center',
+      shadowColor: brandStyle.tint,
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: isDark ? 0.3 : 0.15,
+      shadowRadius: 6,
+      elevation: 4,
+      borderWidth: 1,
+      borderColor: isDark ? 'rgba(80, 80, 90, 0.3)' : 'rgba(220, 220, 230, 0.8)',
     },
     platformButtonText: {
       color: isDark ? 'white' : '#000000',
       fontSize: 16,
-      fontWeight: '500', 
+      fontWeight: '600',
+      letterSpacing: -0.2,
     },
   });
 
@@ -290,23 +333,37 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
         <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
           {/* Header with gradient */}
           <View style={styles.gradientHeader}>
+            {/* Pattern overlay for visual interest */}
+            <View style={styles.headerPattern}>
+              {/* We could add a pattern image here */}
+            </View>
+            
             <TouchableOpacity 
               onPress={onBack}
               style={styles.backButton}
               activeOpacity={0.7}
             >
-              <Icon name="chevron-left" size={22} color={isDark ? 'white' : '#000000'} />
+              <Feather name="chevron-left" size={22} color={isDark ? 'white' : '#000000'} />
             </TouchableOpacity>
             
             <View style={styles.headerContent}>
               <Text style={styles.headerTitle}>{title}</Text>
-              <Text style={styles.headerSubtitle}>{time} · {location}</Text>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <Feather name="clock" size={16} color={isDark ? 'rgba(235, 235, 245, 0.8)' : 'rgba(60, 60, 67, 0.8)'} style={{marginRight: 6}} />
+                <Text style={styles.headerSubtitle}>{time}</Text>
+                <Text style={[styles.headerSubtitle, {marginHorizontal: 8}]}>•</Text>
+                <Feather name="map-pin" size={16} color={isDark ? 'rgba(235, 235, 245, 0.8)' : 'rgba(60, 60, 67, 0.8)'} style={{marginRight: 6}} />
+                <Text style={styles.headerSubtitle}>{location}</Text>
+              </View>
             </View>
           </View>
 
           {/* Participants */}
           <View style={styles.participantsSection}>
-            <Text style={styles.sectionTitle}>Participants</Text>
+            <View style={styles.sectionTitle}>
+              <Ionicons name="people" size={20} color={brandStyle.tint} style={{marginRight: 8}} />
+              <Text style={{fontSize: 20, fontWeight: '700', letterSpacing: -0.5, color: isDark ? 'white' : '#000000'}}>Participants</Text>
+            </View>
             <View style={styles.participantsRow}>
               {participants.map((participant) => (
                 <View 
@@ -329,17 +386,28 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
 
           {/* Join buttons */}
           <View style={styles.platformsSection}>
-            <Text style={styles.sectionTitle}>Join through</Text>
+            <View style={styles.sectionTitle}>
+              <MaterialCommunityIcons name="connection" size={20} color={brandStyle.tint} style={{marginRight: 8}} />
+              <Text style={{fontSize: 20, fontWeight: '700', letterSpacing: -0.5, color: isDark ? 'white' : '#000000'}}>Join through</Text>
+            </View>
             <View style={styles.platformsGrid}>
-              {platforms.map((platform) => (
-                <TouchableOpacity
-                  key={platform}
-                  style={styles.platformButton}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.platformButtonText}>{platform}</Text>
-                </TouchableOpacity>
-              ))}
+              {platforms.map((platform) => {
+                // Define icon name with proper type checking
+                let iconName: "monitor" | "video" | "phone" = "monitor";
+                if (platform.toLowerCase().includes("zoom")) iconName = "video";
+                if (platform.toLowerCase().includes("phone")) iconName = "phone";
+                
+                return (
+                  <TouchableOpacity
+                    key={platform}
+                    style={styles.platformButton}
+                    activeOpacity={0.7}
+                  >
+                    <Feather name={iconName} size={18} color={brandStyle.tint} style={{marginBottom: 6}} />
+                    <Text style={styles.platformButtonText}>{platform}</Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           </View>
         </ScrollView>

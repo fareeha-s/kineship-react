@@ -1,24 +1,17 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, useColorScheme, Alert, ActivityIndicator } from 'react-native';
 import WorkoutCard from '../../src/components/WorkoutCard';
-import { mockWorkouts } from '../../app/App';
+import { mockWorkouts } from '../App';
 import { useRouter } from 'expo-router';
 import { useCalendar } from '../../src/hooks/useCalendar';
-import Icon from 'react-native-vector-icons/Feather';
+import { Feather } from '@expo/vector-icons';
 
-interface Workout {
-  id: string;
-  title: string;
-  time: string;
-  location: string;
-  participants: {
-    id: string;
-    name: string;
-    avatar: string;
-  }[];
-  platforms: string[];
-}
+import { Workout } from '../../src/types/workout';
 
+/**
+ * WorkoutFeed component displays a list of workouts from both mock data and calendar events.
+ * It allows users to pull workouts from their calendar and toggle their visibility.
+ */
 const WorkoutFeed = () => {
   const router = useRouter();
   const colorScheme = useColorScheme();
@@ -34,13 +27,22 @@ const WorkoutFeed = () => {
     ? [...mockWorkouts, ...localCalendarWorkouts]
     : mockWorkouts;
 
+  /**
+   * Handle press events on workout cards
+   * For both calendar events and mock workouts: navigate to the workout details screen
+   */
   const handleWorkoutPress = (workout: Workout) => {
+    // Navigate to workout detail screen for all workouts
     router.push({
       pathname: "/workout/[id]",
       params: { id: workout.id }
     });
   };
 
+  /**
+   * Format the current date for display
+   * @returns {string} Formatted date string (e.g., 'Mon Mar 17')
+   */
   const formatDate = () => {
     const today = new Date();
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -48,59 +50,33 @@ const WorkoutFeed = () => {
     return `${days[today.getDay()]} ${months[today.getMonth()]} ${today.getDate()}`;
   };
 
+  /**
+   * Fetch workouts from the calendar and update the local state
+   * This will request calendar permissions if not already granted
+   */
   const handlePullCalendar = async () => {
     try {
       setLoading(true);
+      // Clear existing calendar workouts
+      setLocalCalendarWorkouts([]);
       
-      // Create mock calendar workouts
-      const mockCalendarWorkouts = [
-        {
-          id: 'cal-1',
-          title: 'Morning Yoga',
-          time: '8:00 AM',
-          location: 'Yoga Studio',
-          participants: [{ id: '1', name: 'You', avatar: 'https://i.pravatar.cc/150?img=1' }],
-          platforms: ['ClassPass']
-        },
-        {
-          id: 'cal-2',
-          title: 'Evening Run',
-          time: '6:30 PM',
-          location: 'Central Park',
-          participants: [{ id: '1', name: 'You', avatar: 'https://i.pravatar.cc/150?img=1' }],
-          platforms: ['Strava']
-        },
-        {
-          id: 'cal-3',
-          title: 'HIIT Workout',
-          time: '5:00 PM',
-          location: 'Fitness First',
-          participants: [{ id: '1', name: 'You', avatar: 'https://i.pravatar.cc/150?img=1' }],
-          platforms: ['MindBody']
-        }
-      ];
+      await refreshWorkouts();
       
-      // Set local calendar workouts
-      setLocalCalendarWorkouts(mockCalendarWorkouts);
-      
-      // Update state
+      // Update with new workouts
+      setLocalCalendarWorkouts(formattedWorkouts);
       setCalendarInitialized(true);
       setShowCalendarWorkouts(true);
       
-      Alert.alert('Success', 'Successfully pulled workouts from calendar');
+      // Show success message
+      Alert.alert('Success', 'Calendar workouts refreshed');
     } catch (err) {
-      Alert.alert('Error', 'Failed to pull calendar workouts: ' + (err instanceof Error ? err.message : String(err)));
+      console.error('Error pulling calendar workouts:', err);
+      Alert.alert('Error', 'Failed to pull calendar workouts');
     } finally {
       setLoading(false);
     }
   };
 
-  const navigateToCalendarView = () => {
-    router.push({
-      pathname: "/calendar",
-      params: {}
-    });
-  };
 
   return (
     <View style={[
@@ -116,23 +92,16 @@ const WorkoutFeed = () => {
 
         {/* Calendar Button */}
         <TouchableOpacity 
-          style={styles.calendarButton}
+          style={[styles.calendarButton, loading && styles.calendarButtonDisabled]}
           onPress={handlePullCalendar}
-          disabled={loading || calendarLoading}
+          disabled={loading}
         >
           <Text style={styles.calendarButtonText}>
             {calendarInitialized ? 'Refresh Calendar Workouts' : 'Pull Workouts from Calendar'}
           </Text>
-          {(loading || calendarLoading) && <ActivityIndicator size="small" color="white" style={styles.smallLoader} />}
+          {loading && <ActivityIndicator size="small" color="white" style={styles.smallLoader} />}
         </TouchableOpacity>
 
-        {/* Calendar View Button */}
-        <TouchableOpacity 
-          style={styles.calendarViewButton}
-          onPress={navigateToCalendarView}
-        >
-          <Text style={styles.calendarViewButtonText}>View Calendar</Text>
-        </TouchableOpacity>
 
         {/* Toggle Calendar Workouts (if initialized) */}
         {calendarInitialized && hasPermission && (
@@ -215,19 +184,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 16,
   },
-  calendarViewButton: {
-    backgroundColor: '#6b7280',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginBottom: 16,
-    alignItems: 'center',
-  },
-  calendarViewButtonText: {
-    color: 'white',
-    fontWeight: '500',
-    fontSize: 14,
-  },
+
   toggleButton: {
     backgroundColor: '#f3f4f6',
     paddingVertical: 8,
@@ -250,6 +207,9 @@ const styles = StyleSheet.create({
   },
   smallLoader: {
     marginLeft: 8,
+  },
+  calendarButtonDisabled: {
+    opacity: 0.7,
   },
   workoutList: {
     paddingTop: 8,

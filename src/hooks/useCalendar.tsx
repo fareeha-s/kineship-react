@@ -1,23 +1,11 @@
 import { useState, useEffect } from 'react';
-import { calendarService, CalendarWorkout } from '../services/calendarService';
+import { calendarService } from '../services/calendarService';
+import { CalendarWorkout, Workout } from '../types/workout';
 import { Alert } from 'react-native';
-
-export interface FormattedWorkout {
-  id: string;
-  title: string;
-  time: string;
-  location: string;
-  participants: {
-    id: string;
-    name: string;
-    avatar: string;
-  }[];
-  platforms: string[];
-}
 
 export const useCalendar = () => {
   const [calendarWorkouts, setCalendarWorkouts] = useState<CalendarWorkout[]>([]);
-  const [formattedWorkouts, setFormattedWorkouts] = useState<FormattedWorkout[]>([]);
+  const [formattedWorkouts, setFormattedWorkouts] = useState<Workout[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasPermission, setHasPermission] = useState(false);
@@ -37,7 +25,7 @@ export const useCalendar = () => {
       const thirtyDaysFromNow = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
       
       const events = await calendarService.getCalendarEvents(now, thirtyDaysFromNow);
-      Alert.alert('Events Found', `Found ${events.length} calendar events`);
+      console.log(`Found ${events.length} calendar events`);
       setCalendarWorkouts(events);
       
       // Format workouts for WorkoutCard component

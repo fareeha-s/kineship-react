@@ -1,38 +1,17 @@
 import * as Calendar from 'expo-calendar';
-import { Platform, Alert } from 'react-native';
+import { Alert } from 'react-native';
+import { WORKOUT_KEYWORDS, PLATFORM_IDENTIFIERS } from '../constants/workouts';
+import { CalendarWorkout, Workout } from '../types/workout';
 
-export interface CalendarWorkout {
-  id: string;
-  title: string;
-  startDate: Date;
-  endDate: Date;
-  location: string;
-  source?: string;
-  participants?: { id: string; name: string; avatar: string }[];
-}
-
-// Keywords to identify workout events
-const WORKOUT_KEYWORDS = [
-  'workout', 'gym', 'fitness', 'exercise', 'training',
-  'class', 'yoga', 'pilates', 'spin', 'cycling', 'run',
-  'cardio', 'strength', 'hiit', 'crossfit', 'barre',
-  'zumba', 'dance', 'bootcamp', 'boxing', 'swim'
-];
-
-// Platform identifiers
-const PLATFORM_IDENTIFIERS = [
-  { name: 'ClassPass', keywords: ['classpass', 'class pass'] },
-  { name: 'Strava', keywords: ['strava'] },
-  { name: 'MindBody', keywords: ['mindbody', 'mind body'] },
-  { name: 'Peloton', keywords: ['peloton'] },
-  { name: 'Nike Training Club', keywords: ['nike', 'ntc'] },
-  { name: 'Equinox+', keywords: ['equinox'] },
-  { name: 'Barry\'s', keywords: ['barry', 'barrys'] },
-  { name: 'SoulCycle', keywords: ['soul', 'soulcycle'] },
-];
+/**
+ * Service for handling calendar-related operations
+ */
 
 export const calendarService = {
-  // Request calendar permissions
+  /**
+   * Request calendar permissions from the user
+   * @returns {Promise<boolean>} True if permissions are granted, false otherwise
+   */
   requestCalendarPermissions: async () => {
     try {
       // For testing, you can return true to bypass permission checks
@@ -55,55 +34,127 @@ export const calendarService = {
     }
   },
 
-  // Get calendar events
+  /**
+   * Fetch and filter workout events from the user's calendars
+   * @param {Date} startDate - Start date to fetch events from
+   * @param {Date} endDate - End date to fetch events to
+   * @returns {Promise<CalendarWorkout[]>} Array of workout events
+   */
   getCalendarEvents: async (startDate: Date, endDate: Date): Promise<CalendarWorkout[]> => {
     try {
-      // For testing, you can return mock data
-      if (__DEV__) {
-        return [
-          {
-            id: 'mock-1',
-            title: 'Morning Yoga',
-            startDate: new Date(new Date().setHours(8, 0, 0, 0)),
-            endDate: new Date(new Date().setHours(9, 0, 0, 0)),
-            location: 'Yoga Studio',
-            source: 'ClassPass'
-          },
-          {
-            id: 'mock-2',
-            title: 'Evening Run',
-            startDate: new Date(new Date().setHours(18, 30, 0, 0)),
-            endDate: new Date(new Date().setHours(19, 30, 0, 0)),
-            location: 'Central Park',
-            source: 'Strava'
-          },
-          {
-            id: 'mock-3',
-            title: 'HIIT Workout',
-            startDate: new Date(new Date().setDate(new Date().getDate() + 1)),
-            endDate: new Date(new Date().setDate(new Date().getDate() + 1)),
-            location: 'Fitness First',
-            source: 'MindBody'
-          }
-        ];
-      }
+      console.log('Getting calendar events...');
       
       // Get all calendars
+      console.log('Fetching calendars...');
       const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
+      console.log('Found calendars:', calendars.length);
       
       // Get events from all calendars
+      console.log('Fetching events from', startDate, 'to', endDate);
       const events = await Calendar.getEventsAsync(
         calendars.map(calendar => calendar.id),
         startDate,
         endDate
       );
+      console.log('Found events:', events.length);
       
-      // Filter events that look like workouts
-      return events
-        .filter(event => {
-          const eventText = `${event.title} ${event.notes || ''} ${event.location || ''}`.toLowerCase();
-          return WORKOUT_KEYWORDS.some(keyword => eventText.includes(keyword.toLowerCase()));
-        })
+      // Log all events for debugging
+      console.log('All calendar events:', events.map(e => ({ title: e.title, id: e.calendarId })));
+      
+      // Practical approach: Use calendar name and specific workout indicators
+      const filteredEvents = events.filter(event => {
+        const title = (event.title || '').toLowerCase();
+        const notes = (event.notes || '').toLowerCase();
+        const location = (event.location || '').toLowerCase();
+        
+        // Get calendar name from the calendars list using calendarId
+        const calendar = calendars.find(cal => cal.id === event.calendarId);
+        const calendarName = calendar ? calendar.title.toLowerCase() : '';
+        
+        console.log(`Checking event: "${title}" from calendar: "${calendarName}"`);
+        
+        // 1. First check: Is this from a fitness-specific calendar?
+        const fitnessCalendars = ['fitness', 'workout', 'gym', 'exercise', 'training', 'health'];
+        if (fitnessCalendars.some(name => calendarName.includes(name))) {
+          console.log('✅ Included from fitness calendar:', title);
+          return true;
+        }
+        
+        // 2. Explicit business/personal events to exclude
+        const businessEvents = [
+          'weeklies', 'weekly', 'meeting', 'sync', '1:1', 'one-on-one', 'standup', 
+          'catch up', 'catchup', 'interview', 'call', 'chat', 'discussion',
+          'brand', 'tasting', 'review', 'planning', 'retro', 'retrospective'
+        ];
+        
+        if (businessEvents.some(term => title.includes(term))) {
+          console.log('❌ Excluded business event:', title);
+          return false;
+        }
+        
+        // 3. Explicit personal events to exclude
+        const personalEvents = [
+          'lunch', 'dinner', 'breakfast', 'coffee', 'drinks', 'party', 'celebration',
+          'birthday', 'anniversary', 'doctor', 'dentist', 'appointment', 'haircut'
+        ];
+        
+        if (personalEvents.some(term => title.includes(term))) {
+          console.log('❌ Excluded personal event:', title);
+          return false;
+        }
+        
+        // 4. Known fitness studios and activities - definite includes
+        const fitnessVenues = [
+          'equinox', 'soulcycle', 'peloton', 'orangetheory', 'barry\'s', 'barrys',
+          'f45', 'crunch', 'lifetime', 'ymca', 'planet fitness', 'la fitness',
+          'yoga', 'pilates', 'cycling', 'run club', 'crossfit', 'zumba'
+        ];
+        
+        if (fitnessVenues.some(venue => title.includes(venue) || location.includes(venue))) {
+          console.log('✅ Included fitness venue event:', title);
+          return true;
+        }
+        
+        // 5. Explicit workout terms
+        const workoutTerms = ['workout', 'class', 'training', 'gym', 'fitness', 'exercise'];
+        if (workoutTerms.some(term => title.includes(term))) {
+          console.log('✅ Included workout term event:', title);
+          return true;
+        }
+        
+        // 6. Simple workout names - exact matches for common workout types
+        const simpleWorkoutNames = [
+          'spin', 'run', 'running', 'swim', 'swimming', 'hike', 'hiking', 
+          'walk', 'walking', 'bike', 'biking', 'cycle', 'cycling', 'lift', 
+          'lifting', 'weights', 'cardio', 'hiit', 'yoga', 'pilates'
+        ];
+        
+        // Check if the title is exactly a workout name or starts with one
+        for (const name of simpleWorkoutNames) {
+          // Exact match or starts with the workout name
+          if (title === name || title.startsWith(name + ' ')) {
+            console.log('✅ Included simple workout name:', title);
+            return true;
+          }
+          
+          // Also check if it's part of a phrase like "morning spin" or "evening run"
+          const commonPrefixes = ['morning', 'evening', 'afternoon', 'night', 'daily', 'weekly'];
+          for (const prefix of commonPrefixes) {
+            if (title === `${prefix} ${name}` || title.startsWith(`${prefix} ${name} `)) {
+              console.log('✅ Included prefixed workout name:', title);
+              return true;
+            }
+          }
+        }
+        
+        // 7. For everything else, be conservative and exclude
+        console.log('❌ Excluded by default:', title);
+        return false;
+      });
+      
+      console.log('Final workout events:', filteredEvents.map(e => e.title));
+      
+      return filteredEvents
         .map(event => {
           const eventText = `${event.title} ${event.notes || ''} ${event.location || ''}`.toLowerCase();
           
@@ -142,7 +193,12 @@ export const calendarService = {
     }
   },
 
-  formatWorkoutForCard: (workout: CalendarWorkout) => {
+  /**
+   * Format a calendar workout event for display in a workout card
+   * @param {CalendarWorkout} workout - The calendar workout to format
+   * @returns {Workout} Formatted workout data for display
+   */
+  formatWorkoutForCard: (workout: CalendarWorkout): Workout => {
     const timeString = workout.startDate.toLocaleTimeString([], { 
       hour: 'numeric', 
       minute: '2-digit',
@@ -157,8 +213,12 @@ export const calendarService = {
       ? [workout.source] 
       : ['Calendar'];
 
+    // Create a unique ID by combining the calendar ID with the event ID and timestamp
+    // This ensures no duplicate IDs even if events have the same ID across different calendars
+    const uniqueId = `cal-${workout.id}-${workout.startDate.getTime()}`;
+    
     return {
-      id: workout.id,
+      id: uniqueId,
       title: workout.title,
       time: timeString,
       location: workout.location,
