@@ -42,7 +42,7 @@ export const useCalendar = (): UseCalendarReturn => {
     }
   };
 
-  const refreshWorkouts = async (extendRange: boolean = false) => {
+  const refreshWorkouts = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -57,15 +57,10 @@ export const useCalendar = (): UseCalendarReturn => {
       const startDate = new Date();
       let endDate;
       
-      if (extendRange) {
-        // Extend the range by 7 more days
-        endDate = new Date(currentEndDate);
-        endDate.setDate(endDate.getDate() + 7);
-        setCurrentEndDate(endDate);
-      } else {
-        // Use the current end date
-        endDate = currentEndDate;
-      }
+      // Always try to load up to 14 days
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 14);
+      setCurrentEndDate(endDate);
 
       const events = await calendarService.getCalendarEvents(startDate, endDate);
       const formatted = events.map(calendarService.formatWorkoutForCard);

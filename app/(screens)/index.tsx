@@ -13,6 +13,9 @@ import { Workout } from '../../src/types/workout';
  * It allows users to pull workouts from their calendar and toggle their visibility.
  */
 const WorkoutFeed = () => {
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasReachedEnd, setHasReachedEnd] = useState(false);
+  const [visibleWorkouts, setVisibleWorkouts] = useState(5); // Start with 5 workout cards
   const router = useRouter();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
@@ -120,8 +123,13 @@ const WorkoutFeed = () => {
       // Update with new workouts
       setLocalCalendarWorkouts(workoutsWithDates);
       
-      // Show appropriate message based on results
+      // Check if we've reached the end (14 days)
       if (workoutsWithDates.length > 0) {
+        const lastWorkout = workoutsWithDates[workoutsWithDates.length - 1];
+        const lastWorkoutDate = lastWorkout.rawDate || new Date();
+        const daysSinceStart = Math.floor((lastWorkoutDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+        setHasReachedEnd(daysSinceStart >= 14);
+        
         Alert.alert('Success', `Found ${workoutsWithDates.length} calendar workouts`);
       } else {
         Alert.alert('No Workouts Found', 'No workout events were found in your calendar. Try adding more specific workout names to your calendar events.');
@@ -140,7 +148,47 @@ const WorkoutFeed = () => {
       styles.container, 
       { backgroundColor: isDark ? '#000000' : '#f9fafb' }
     ]}>
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
+      <ScrollView 
+        style={styles.scrollView} 
+        contentContainerStyle={styles.content}
+        onScroll={({ nativeEvent }) => {
+          const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+          const paddingToBottom = 50; // Load more when within 50px of the bottom
+          const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= 
+            contentSize.height - paddingToBottom;
+
+          if (isCloseToBottom && !isLoadingMore && showCalendarWorkouts) {
+            setIsLoadingMore(true);
+            
+            // First try to show more of the already loaded workouts
+            const totalWorkouts = sortedDates.reduce((sum, date) => sum + workoutsByDate[date].length, 0);
+            
+            if (visibleWorkouts < totalWorkouts) {
+              // If we have more workouts loaded but not shown, show 3 more
+              setTimeout(() => {
+                setVisibleWorkouts(prev => Math.min(prev + 3, totalWorkouts));
+                setIsLoadingMore(false);
+              }, 300); // Small delay for smooth loading feel
+            } else if (!hasReachedEnd) {
+              // If we've shown all loaded workouts, try to load more from calendar
+              refreshWorkouts().then(() => {
+                setIsLoadingMore(false);
+                // Check if we've reached the end
+                const lastDate = sortedDates[sortedDates.length - 1];
+                if (lastDate) {
+                  const lastWorkout = workoutsByDate[lastDate][0];
+                  const lastWorkoutDate = lastWorkout.rawDate || new Date();
+                  const daysSinceStart = Math.floor((lastWorkoutDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+                  setHasReachedEnd(daysSinceStart >= 14);
+                }
+              });
+            } else {
+              setIsLoadingMore(false);
+            }
+          }
+        }}
+        scrollEventThrottle={400} // Throttle scroll events to every 400ms
+      >
         {/* Today's Section */}
         <View style={styles.dateSection}>
           <Text style={[styles.dateLabel, { color: isDark ? '#666666' : '#6b7280' }]}>Today</Text>
@@ -158,7 +206,6 @@ const WorkoutFeed = () => {
           </Text>
           {loading && <ActivityIndicator size="small" color="white" style={styles.smallLoader} />}
         </TouchableOpacity>
-
 
         {/* Toggle Calendar Workouts (if initialized) */}
         {calendarInitialized && hasPermission && (
@@ -182,7 +229,17 @@ const WorkoutFeed = () => {
 
         {/* Workouts List Grouped by Date */}
         <View style={styles.workoutList}>
-          {sortedDates.map((date) => (
+          {/* Show limited number of workout cards */}
+          {sortedDates.map((date, index) => {
+            // Count total workouts up to this date
+            const totalWorkoutsSoFar = sortedDates
+              .slice(0, index + 1)
+              .reduce((sum, d) => sum + workoutsByDate[d].length, 0);
+            
+            // Only show if we're within our visible workout limit
+            if (totalWorkoutsSoFar > visibleWorkouts) return null;
+            
+            return (
             <View key={date} style={styles.dateSection}>
               {/* Date Header */}
               <Text style={[styles.dateLabel, isDark && { color: '#fff' }]}>
@@ -203,58 +260,23 @@ const WorkoutFeed = () => {
                 </TouchableOpacity>
               ))}
             </View>
-          ))}
-          
-          {/* Load More Button after 3 days */}
-          {showCalendarWorkouts && calendarInitialized && sortedDates.length > 0 && (
-            <View>
-              {sortedDates.slice(0, 3).map((date) => (
-                <View key={date} style={styles.dateSection}>
-                  <Text style={[styles.dateLabel, isDark && { color: '#fff' }]}>
-                    {date}
-                  </Text>
-                  {workoutsByDate[date].map((workout) => (
-                    <TouchableOpacity
-                      key={workout.id}
-                      onPress={() => handleWorkoutPress(workout)}
-                      style={styles.workoutItem}
-                    >
-                      <WorkoutCard {...workout} />
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              ))}
-              
-              {/* Load More Button */}
-              <TouchableOpacity 
-                style={[styles.calendarButton, loading && styles.calendarButtonDisabled]}
-                onPress={() => refreshWorkouts(true)}
-                disabled={loading}
-              >
-                <Text style={styles.calendarButtonText}>
-                  {loading ? 'Loading...' : 'Load More Workouts'}
-                </Text>
-                {loading && <ActivityIndicator size="small" color="white" style={styles.smallLoader} />}
-              </TouchableOpacity>
+          )})}
 
-              {/* Remaining dates */}
-              {sortedDates.slice(3).map((date) => (
-                <View key={date} style={styles.dateSection}>
-                  <Text style={[styles.dateLabel, isDark && { color: '#fff' }]}>
-                    {date}
-                  </Text>
-                  {workoutsByDate[date].map((workout) => (
-                    <TouchableOpacity
-                      key={workout.id}
-                      onPress={() => handleWorkoutPress(workout)}
-                      style={styles.workoutItem}
-                    >
-                      <WorkoutCard {...workout} />
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              ))}
+          {/* Loading indicator at bottom */}
+          {isLoadingMore && showCalendarWorkouts && (
+            <View style={styles.loadingMore}>
+              <ActivityIndicator size="small" color={isDark ? '#666666' : '#6b7280'} />
+              <Text style={[styles.loadingText, { color: isDark ? '#666666' : '#6b7280' }]}>
+                Loading more workouts...
+              </Text>
             </View>
+          )}
+          
+          {/* End of list indicator */}
+          {hasReachedEnd && showCalendarWorkouts && sortedDates.length > 0 && (
+            <Text style={[styles.endText, { color: isDark ? '#666666' : '#6b7280' }]}>
+              No more workouts to load
+            </Text>
           )}
         </View>
       </ScrollView>
@@ -263,6 +285,23 @@ const WorkoutFeed = () => {
 };
 
 const styles = StyleSheet.create({
+  loadingMore: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 20,
+    gap: 8,
+  },
+  loadingText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  endText: {
+    textAlign: 'center',
+    paddingVertical: 20,
+    fontSize: 14,
+    fontWeight: '500',
+  },
   container: {
     flex: 1,
   },
