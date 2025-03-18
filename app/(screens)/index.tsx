@@ -317,14 +317,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   dateSection: {
-    paddingBottom: 16,
-    marginTop: 16,
+    paddingBottom: 12,
+    marginTop: 12,
   },
   dateLabel: {
     fontSize: 26,
     fontWeight: '700',
     letterSpacing: -0.5,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   date: {
     fontSize: 26,
@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
     gap: 1,
   },
   workoutItem: {
-    marginBottom: 8, // Reduced from 16 to 8 for cards within same day
+    marginBottom: 4, // Reduced from 8 to 4 for cards within same day
   },
   lastWorkoutItem: {
     marginBottom: 0, // No margin for last card in a day
