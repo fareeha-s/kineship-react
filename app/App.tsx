@@ -19,6 +19,10 @@ export const mockWorkouts = [
     ],
     platforms: ['Strava', 'ClassPass'],
     rawDate: new Date(), // Today
+    type: 'HIIT',
+    intensity: 'Intense',
+    duration: '60 min',
+    description: 'High-intensity interval training combining treadmill running and strength training. This intense workout is designed to build endurance and strength simultaneously.'
   },
   {
     id: '2',
@@ -34,6 +38,10 @@ export const mockWorkouts = [
     ],
     platforms: ['Strava'],
     rawDate: new Date(new Date().setDate(new Date().getDate() + 1)), // Tomorrow
+    type: 'Running',
+    intensity: 'Moderate',
+    duration: '45 min',
+    description: 'Group run along the scenic Marina Bay. Perfect for all levels with beautiful waterfront views and a supportive community atmosphere.'
   },
   {
     id: '3',
@@ -46,6 +54,10 @@ export const mockWorkouts = [
     ],
     platforms: ['MindBody'],
     rawDate: new Date(new Date().setDate(new Date().getDate() + 2)), // Day after tomorrow
+    type: 'Pilates',
+    intensity: 'Moderate',
+    duration: '50 min',
+    description: 'Intermediate Pilates class focusing on core strength, flexibility, and controlled movement. This class builds on fundamentals with more challenging sequences.'
   },
 ];
 

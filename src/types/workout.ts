@@ -19,6 +19,10 @@ export interface Workout {
   platforms: string[];
   date?: string; // Optional for backward compatibility with mock workouts
   rawDate?: Date; // Raw date object for sorting
+  type?: string; // Type of workout (e.g., "Strength", "Cardio")
+  intensity?: string; // Intensity level (e.g., "Light", "Moderate", "Intense")
+  duration?: string; // Duration of workout (e.g., "45 min")
+  description?: string; // Detailed description of the workout
 }
 
 /**
@@ -32,4 +36,5 @@ export interface CalendarWorkout {
   location: string;
   source?: string;
   participants?: WorkoutParticipant[];
+  notes?: string;
 }

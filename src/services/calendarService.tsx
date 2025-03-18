@@ -261,13 +261,86 @@ export const calendarService = {
       ? [workout.source] 
       : ['Calendar'];
 
-    // Create a unique ID by combining the calendar ID with the event ID and timestamp
-    // This ensures no duplicate IDs even if events have the same ID across different calendars
-    const uniqueId = `cal-${workout.id}-${workout.startDate.getTime()}`;
-    
     // Create a proper date object to ensure it's passed correctly
     const rawDate = new Date(workout.startDate);
     console.log(`Formatting workout "${workout.title}" with date: ${dateString}, rawDate: ${rawDate}`);
+    
+    // Extract workout details from the title or notes if available
+    let workoutDetails = {
+      type: '',
+      intensity: '',
+      duration: '',
+      description: ''
+    };
+    
+    // Try to extract workout type from title
+    const workoutTypes = [
+      'Strength', 'Cardio', 'HIIT', 'Yoga', 'Running', 'Cycling', 
+      'Swimming', 'CrossFit', 'Pilates', 'Boxing', 'Kickboxing',
+      'Zumba', 'Barre', 'Stretching', 'Core', 'Abs', 'Legs', 'Arms',
+      'Upper Body', 'Lower Body', 'Full Body'
+    ];
+    
+    // Check title for workout type
+    for (const type of workoutTypes) {
+      if (workout.title.toLowerCase().includes(type.toLowerCase())) {
+        workoutDetails.type = type;
+        break;
+      }
+    }
+    
+    // If no type found, use a default based on keywords
+    if (!workoutDetails.type) {
+      if (workout.title.toLowerCase().includes('run')) workoutDetails.type = 'Running';
+      else if (workout.title.toLowerCase().includes('bike') || workout.title.toLowerCase().includes('cycle')) workoutDetails.type = 'Cycling';
+      else if (workout.title.toLowerCase().includes('swim')) workoutDetails.type = 'Swimming';
+      else if (workout.title.toLowerCase().includes('lift') || workout.title.toLowerCase().includes('weight')) workoutDetails.type = 'Strength';
+      else workoutDetails.type = 'Workout';
+    }
+
+    // Calculate duration from start and end time
+    if (workout.startDate && workout.endDate) {
+      const start = new Date(workout.startDate);
+      const end = new Date(workout.endDate);
+      const durationMs = end.getTime() - start.getTime();
+      const durationMinutes = Math.round(durationMs / (1000 * 60));
+      workoutDetails.duration = `${durationMinutes} min`;
+    }
+
+    // Set intensity based on keywords in title or notes
+    const intensityKeywords = {
+      light: ['light', 'easy', 'beginner', 'recovery'],
+      moderate: ['moderate', 'medium', 'intermediate'],
+      intense: ['intense', 'hard', 'advanced', 'heavy', 'power', 'hiit']
+    };
+
+    const titleAndNotes = `${workout.title} ${workout.notes || ''}`.toLowerCase();
+    
+    for (const [intensity, keywords] of Object.entries(intensityKeywords)) {
+      if (keywords.some(keyword => titleAndNotes.includes(keyword))) {
+        workoutDetails.intensity = intensity.charAt(0).toUpperCase() + intensity.slice(1);
+        break;
+      }
+    }
+
+    // If no intensity found, set a default based on workout type
+    if (!workoutDetails.intensity) {
+      if (['HIIT', 'CrossFit', 'Boxing', 'Kickboxing'].includes(workoutDetails.type)) {
+        workoutDetails.intensity = 'Intense';
+      } else if (['Yoga', 'Stretching', 'Barre'].includes(workoutDetails.type)) {
+        workoutDetails.intensity = 'Light';
+      } else {
+        workoutDetails.intensity = 'Moderate';
+      }
+    }
+
+    // Set description from notes or generate a default one
+    workoutDetails.description = workout.notes || `${workoutDetails.type} workout scheduled for ${dateString}. ` +
+      `This is a ${workoutDetails.intensity.toLowerCase()}-intensity session ` +
+      `${workoutDetails.duration ? `lasting ${workoutDetails.duration}` : ''}.`;
+
+    // Create a unique ID by combining the calendar ID with the event ID and timestamp
+    const uniqueId = `cal-${workout.id}-${workout.startDate.getTime()}`;
     
     return {
       id: uniqueId,
@@ -275,9 +348,13 @@ export const calendarService = {
       time: timeString,
       date: dateString,
       rawDate: rawDate,
-      location: workout.location,
+      location: workout.location || 'Home Workout',
       participants,
-      platforms
+      platforms,
+      type: workoutDetails.type,
+      intensity: workoutDetails.intensity,
+      duration: workoutDetails.duration,
+      description: workoutDetails.description
     };
   }
 };

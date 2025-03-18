@@ -20,6 +20,10 @@ interface WorkoutCardProps {
   expanded?: boolean;
   onBack?: () => void;
   isDark?: boolean;
+  type?: string;
+  intensity?: string;
+  duration?: string;
+  description?: string;
 }
 
 const getBrandStyles = (location: string, isDark: boolean) => {
@@ -64,6 +68,10 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
   expanded = false,
   onBack,
   isDark = false,
+  type,
+  intensity,
+  duration,
+  description,
 }) => {
   const brandStyle = getBrandStyles(location, isDark);
   const animatedOpacity = React.useRef(new Animated.Value(0)).current;
@@ -325,6 +333,59 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
       fontWeight: '600',
       letterSpacing: -0.2,
     },
+    // Workout Details Styles
+    detailsSection: {
+      paddingHorizontal: 16,
+      paddingVertical: 24,
+      borderBottomWidth: 1,
+      borderBottomColor: isDark ? 'rgba(60, 60, 67, 0.3)' : 'rgba(60, 60, 67, 0.1)',
+    },
+    detailsContainer: {
+      marginTop: 16,
+    },
+    detailsRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      marginBottom: 16,
+      gap: 12,
+    },
+    detailItem: {
+      minWidth: 100,
+      backgroundColor: isDark ? 'rgba(60, 60, 67, 0.3)' : 'rgba(242, 242, 247, 0.9)',
+      padding: 12,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: isDark ? 'rgba(80, 80, 90, 0.3)' : 'rgba(220, 220, 230, 0.8)',
+    },
+    detailLabel: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: isDark ? 'rgba(235, 235, 245, 0.6)' : 'rgba(60, 60, 67, 0.6)',
+      marginBottom: 4,
+    },
+    detailValue: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: isDark ? 'white' : '#000000',
+    },
+    descriptionContainer: {
+      backgroundColor: isDark ? 'rgba(60, 60, 67, 0.3)' : 'rgba(242, 242, 247, 0.9)',
+      padding: 16,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: isDark ? 'rgba(80, 80, 90, 0.3)' : 'rgba(220, 220, 230, 0.8)',
+    },
+    descriptionLabel: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: isDark ? 'rgba(235, 235, 245, 0.6)' : 'rgba(60, 60, 67, 0.6)',
+      marginBottom: 8,
+    },
+    descriptionText: {
+      fontSize: 15,
+      lineHeight: 22,
+      color: isDark ? 'white' : '#000000',
+    },
   });
 
   if (expanded) {
@@ -384,6 +445,50 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
             </View>
           </View>
 
+          {/* Workout Details */}
+          {(type || intensity || duration || description) && (
+            <View style={styles.detailsSection}>
+              <View style={styles.sectionTitle}>
+                <Ionicons name="fitness" size={20} color={brandStyle.tint} style={{marginRight: 8}} />
+                <Text style={{fontSize: 20, fontWeight: '700', letterSpacing: -0.5, color: isDark ? 'white' : '#000000'}}>Workout Details</Text>
+              </View>
+              
+              <View style={styles.detailsContainer}>
+                {/* Workout Type, Intensity, Duration */}
+                <View style={styles.detailsRow}>
+                  {type && (
+                    <View style={styles.detailItem}>
+                      <Text style={styles.detailLabel}>Type</Text>
+                      <Text style={styles.detailValue}>{type}</Text>
+                    </View>
+                  )}
+                  
+                  {intensity && (
+                    <View style={styles.detailItem}>
+                      <Text style={styles.detailLabel}>Intensity</Text>
+                      <Text style={styles.detailValue}>{intensity}</Text>
+                    </View>
+                  )}
+                  
+                  {duration && (
+                    <View style={styles.detailItem}>
+                      <Text style={styles.detailLabel}>Duration</Text>
+                      <Text style={styles.detailValue}>{duration}</Text>
+                    </View>
+                  )}
+                </View>
+                
+                {/* Description */}
+                {description && (
+                  <View style={styles.descriptionContainer}>
+                    <Text style={styles.descriptionLabel}>Description</Text>
+                    <Text style={styles.descriptionText}>{description}</Text>
+                  </View>
+                )}
+              </View>
+            </View>
+          )}
+          
           {/* Join buttons */}
           <View style={styles.platformsSection}>
             <View style={styles.sectionTitle}>
