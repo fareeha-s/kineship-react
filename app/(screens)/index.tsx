@@ -148,18 +148,6 @@ const WorkoutFeed = () => {
       styles.container, 
       { backgroundColor: isDark ? '#000000' : '#f9fafb' }
     ]}>
-      {/* Calendar Pull Button (Fixed Position) */}
-      <TouchableOpacity 
-        style={[styles.calendarButton, loading && styles.calendarButtonDisabled]}
-        onPress={handlePullCalendar}
-        disabled={loading}
-      >
-        <Text style={styles.calendarButtonText}>
-          Pull from Calendar
-        </Text>
-        {loading && <ActivityIndicator size="small" color="white" style={styles.smallLoader} />}
-      </TouchableOpacity>
-
       <ScrollView 
         style={styles.scrollView} 
         contentContainerStyle={styles.content}
@@ -201,13 +189,22 @@ const WorkoutFeed = () => {
         }}
         scrollEventThrottle={400} // Throttle scroll events to every 400ms
       >
-        {/* Today's Section */}
-        <View style={styles.dateSection}>
-          <Text style={[styles.dateLabel, { color: isDark ? '#666666' : '#6b7280' }]}>Today</Text>
-          <Text style={[styles.date, { color: isDark ? '#ffffff' : '#111827' }]}>{formatDate()}</Text>
+        {/* Header Section */}
+        <View style={styles.headerSection}>
+          <View style={styles.dateContainer}>
+            <Text style={[styles.date, { color: isDark ? '#ffffff' : '#111827' }]}>{formatDate()}</Text>
+          </View>
+          <TouchableOpacity 
+            style={[styles.calendarButton, loading && styles.calendarButtonDisabled]}
+            onPress={handlePullCalendar}
+            disabled={loading}
+          >
+            <Text style={styles.calendarButtonText}>
+              Pull from Calendar
+            </Text>
+            {loading && <ActivityIndicator size="small" color="white" style={styles.smallLoader} />}
+          </TouchableOpacity>
         </View>
-
-
 
         {/* Workouts List Grouped by Date */}
         <View style={styles.workoutList}>
@@ -295,8 +292,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingTop: 16,
+    paddingTop: 24,
     paddingHorizontal: 16,
+  },
+  headerSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  dateContainer: {
+    flex: 1,
   },
   dateSection: {
     paddingBottom: 12,
@@ -314,22 +320,18 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   calendarButton: {
-    position: 'absolute',
-    top: 16,
-    right: 16,
-    zIndex: 1,
     backgroundColor: '#4b5563',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 6,
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
   },
   calendarButtonText: {
     color: 'white',
-    fontWeight: '600',
-    fontSize: 14,
+    fontWeight: '500',
+    fontSize: 13,
   },
 
   toggleButton: {
