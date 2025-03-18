@@ -230,19 +230,19 @@ const WorkoutFeed = () => {
               />
             )}
 
-            {/* Centered Modal Menu */}
+            {/* Dropdown Menu */}
             {showMenu && (
               <View style={styles.menuContainer}>
                 <Animated.View 
                   style={[styles.menu, {
                     opacity: menuAnimation,
                     transform: [{
-                      scale: menuAnimation.interpolate({
+                      translateY: menuAnimation.interpolate({
                         inputRange: [0, 1],
-                        outputRange: [0.9, 1]
+                        outputRange: [-20, 0]
                       })
                     }],
-                    backgroundColor: isDark ? 'rgba(30, 41, 59, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+                    backgroundColor: isDark ? 'rgba(30, 41, 59, 0.85)' : 'rgba(255, 255, 255, 0.85)',
                     borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'
                   }]}
                 >
@@ -422,47 +422,40 @@ const styles = StyleSheet.create({
   },
   menuContainer: {
     position: 'absolute',
-    top: 0,
-    left: 0,
+    top: 40,
     right: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
     zIndex: 2,
   },
   menu: {
-    borderRadius: 16,
-    padding: 8,
+    borderRadius: 12,
+    padding: 6,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 10,
-    width: '80%',
-    maxWidth: 300,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 8,
+    minWidth: 180,
     borderWidth: 1,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    marginVertical: 6,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginVertical: 2,
   },
   menuText: {
-    fontSize: 18,
-    fontWeight: '600',
-    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: '500',
   },
   overlay: {
     position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    top: -100,
+    left: -100,
+    right: -100,
+    bottom: -100,
+    backgroundColor: 'transparent',
   },
 
   toggleButton: {
@@ -497,6 +490,8 @@ const styles = StyleSheet.create({
   },
   workoutItem: {
     marginBottom: 4, // Reduced from 8 to 4 for cards within same day
+    alignSelf: 'flex-start',
+    width: '100%',
   },
   lastWorkoutItem: {
     marginBottom: 0, // No margin for last card in a day
