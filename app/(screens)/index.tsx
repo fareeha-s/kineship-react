@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, useColorScheme, Alert, ActivityIndicator, Modal, Pressable, Animated } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, useColorScheme, Alert, ActivityIndicator, Modal, Pressable, Animated, Platform, StatusBar } from 'react-native';
 import WorkoutCard from '../../src/components/WorkoutCard';
 import { mockWorkouts } from '../App';
 import { useRouter } from 'expo-router';
@@ -351,7 +351,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingTop: 24,
+    paddingTop: Platform.select({
+      ios: 60, // Account for iPhone notch/Dynamic Island
+      android: StatusBar.currentHeight ? StatusBar.currentHeight + 24 : 24,
+      default: 24
+    }),
     paddingHorizontal: 16,
   },
   headerSection: {
@@ -359,6 +363,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 24,
+    paddingTop: Platform.select({
+      ios: 4,
+      default: 0
+    }),
   },
   dateContainer: {
     flex: 1,
