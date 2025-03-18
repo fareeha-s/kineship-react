@@ -59,7 +59,12 @@ export const calendarService = {
       console.log('Found events:', events.length);
       
       // Log all events for debugging
-      console.log('All calendar events:', events.map(e => ({ title: e.title, id: e.calendarId })));
+      console.log('All calendar events:', events.map(e => ({ 
+        title: e.title, 
+        id: e.calendarId,
+        location: e.location,
+        startDate: e.startDate
+      })));
       
       // Practical approach: Use calendar name and specific workout indicators
       const filteredEvents = events.filter(event => {
@@ -82,9 +87,17 @@ export const calendarService = {
         
         // 2. Explicit business/personal events to exclude
         const businessEvents = [
+          // Regular meetings
           'weeklies', 'weekly', 'meeting', 'sync', '1:1', 'one-on-one', 'standup', 
-          'catch up', 'catchup', 'interview', 'call', 'chat', 'discussion',
-          'brand', 'tasting', 'review', 'planning', 'retro', 'retrospective'
+          'scrum', 'sprint', 'huddle', 'check-in', 'alignment', 'status',
+          // Communication
+          'interview', 'call', 'chat', 'discussion', 'conversation', 'debrief',
+          'presentation', 'demo', 'workshop', 'training', 'onboarding',
+          // Planning and review
+          'brand', 'tasting', 'review', 'planning', 'retro', 'retrospective',
+          'strategy', 'roadmap', 'brainstorm', 'ideation', 'kickoff',
+          // General business terms
+          'deadline', 'project', 'client', 'stakeholder', 'vendor', 'partner'
         ];
         
         if (businessEvents.some(term => title.includes(term))) {
@@ -94,8 +107,16 @@ export const calendarService = {
         
         // 3. Explicit personal events to exclude
         const personalEvents = [
-          'lunch', 'dinner', 'breakfast', 'coffee', 'drinks', 'party', 'celebration',
-          'birthday', 'anniversary', 'doctor', 'dentist', 'appointment', 'haircut'
+          // Meals and social gatherings
+          'lunch', 'dinner', 'breakfast', 'brunch', 'coffee', 'drinks', 'happy hour',
+          'party', 'celebration', 'gathering', 'meetup', 'hangout', 'date', 'social',
+          // Personal appointments
+          'birthday', 'anniversary', 'doctor', 'dentist', 'appointment', 'haircut',
+          'salon', 'spa', 'massage', 'therapy', 'counseling',
+          // Travel and events
+          'flight', 'trip', 'vacation', 'concert', 'movie', 'show', 'theater',
+          // General social terms
+          'catch-up', 'hang', 'meet', 'visit'
         ];
         
         if (personalEvents.some(term => title.includes(term))) {
@@ -105,9 +126,17 @@ export const calendarService = {
         
         // 4. Known fitness studios and activities - definite includes
         const fitnessVenues = [
+          // Major gym chains
           'equinox', 'soulcycle', 'peloton', 'orangetheory', 'barry\'s', 'barrys',
           'f45', 'crunch', 'lifetime', 'ymca', 'planet fitness', 'la fitness',
-          'yoga', 'pilates', 'cycling', 'run club', 'crossfit', 'zumba'
+          '24 hour fitness', 'gold\'s gym', 'anytime fitness', 'fitness first',
+          // Boutique studios
+          'solidcore', 'pure barre', 'club pilates', 'corepower', 'rumble',
+          'flywheel', 'cyclebar', 'row house', 'boxing', 'kickboxing',
+          // Activities and classes
+          'yoga', 'pilates', 'cycling', 'run club', 'crossfit', 'zumba',
+          'bootcamp', 'hiit class', 'spin class', 'barre', 'reformer',
+          'trx', 'circuit training', 'personal training', 'pt session'
         ];
         
         if (fitnessVenues.some(venue => title.includes(venue) || location.includes(venue))) {
@@ -126,7 +155,13 @@ export const calendarService = {
         const simpleWorkoutNames = [
           'spin', 'run', 'running', 'swim', 'swimming', 'hike', 'hiking', 
           'walk', 'walking', 'bike', 'biking', 'cycle', 'cycling', 'lift', 
-          'lifting', 'weights', 'cardio', 'hiit', 'yoga', 'pilates'
+          'lifting', 'weights', 'cardio', 'hiit', 'yoga', 'pilates',
+          // Body part specific workouts
+          'upper body', 'lower body', 'core', 'abs', 'leg day', 'arm day',
+          'chest', 'back', 'shoulders', 'arms', 'legs', 'glutes',
+          // Workout types
+          'set', 'circuit', 'strength', 'conditioning', 'mobility', 'stretch',
+          'functional', 'bodyweight', 'resistance', 'endurance'
         ];
         
         // Check if the title is exactly a workout name or starts with one
@@ -144,6 +179,13 @@ export const calendarService = {
               console.log('✅ Included prefixed workout name:', title);
               return true;
             }
+          }
+          
+          // Check if the title contains the workout name as part of a compound phrase
+          // This will catch things like "Upper Body Set" or "Core Workout"
+          if (title.includes(name)) {
+            console.log('✅ Included compound workout name:', title);
+            return true;
           }
         }
         
@@ -204,6 +246,12 @@ export const calendarService = {
       minute: '2-digit',
       hour12: true 
     });
+    
+    // Format the date for display and grouping
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const date = new Date(workout.startDate);
+    const dateString = `${days[date.getDay()]} ${months[date.getMonth()]} ${date.getDate()}`;
 
     const participants = workout.participants || [
       { id: '1', name: 'You', avatar: 'https://i.pravatar.cc/150?img=1' }
@@ -217,10 +265,16 @@ export const calendarService = {
     // This ensures no duplicate IDs even if events have the same ID across different calendars
     const uniqueId = `cal-${workout.id}-${workout.startDate.getTime()}`;
     
+    // Create a proper date object to ensure it's passed correctly
+    const rawDate = new Date(workout.startDate);
+    console.log(`Formatting workout "${workout.title}" with date: ${dateString}, rawDate: ${rawDate}`);
+    
     return {
       id: uniqueId,
       title: workout.title,
       time: timeString,
+      date: dateString,
+      rawDate: rawDate,
       location: workout.location,
       participants,
       platforms

@@ -17,6 +17,8 @@ export interface Workout {
   location: string;
   participants: WorkoutParticipant[];
   platforms: string[];
+  date?: string; // Optional for backward compatibility with mock workouts
+  rawDate?: Date; // Raw date object for sorting
 }
 
 /**

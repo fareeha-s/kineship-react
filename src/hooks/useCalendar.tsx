@@ -29,7 +29,16 @@ export const useCalendar = () => {
       setCalendarWorkouts(events);
       
       // Format workouts for WorkoutCard component
-      const formatted = events.map(workout => calendarService.formatWorkoutForCard(workout));
+      const formatted = events.map(workout => {
+        const formattedWorkout = calendarService.formatWorkoutForCard(workout);
+        console.log('Formatted calendar workout:', {
+          id: formattedWorkout.id,
+          title: formattedWorkout.title,
+          date: formattedWorkout.date,
+          hasRawDate: !!formattedWorkout.rawDate
+        });
+        return formattedWorkout;
+      });
       setFormattedWorkouts(formatted);
     } catch (err) {
       Alert.alert('Calendar Error', err instanceof Error ? err.message : 'Failed to fetch workouts');

@@ -26,6 +26,40 @@ const WorkoutFeed = () => {
   const allWorkouts = showCalendarWorkouts && calendarInitialized
     ? [...mockWorkouts, ...localCalendarWorkouts]
     : mockWorkouts;
+    
+  // Debug: Log all workouts with their dates
+  console.log('All workouts with dates:', allWorkouts.map(w => ({ 
+    id: w.id, 
+    title: w.title, 
+    date: w.date, 
+    hasRawDate: !!w.rawDate 
+  })));
+  
+  // Group workouts by date
+  const workoutsByDate = allWorkouts.reduce((acc, workout) => {
+    // Use the workout's date or default to today
+    const date = workout.date || formatDate();
+    console.log(`Workout "${workout.title}" has date: ${date}`);
+    
+    if (!acc[date]) {
+      acc[date] = [];
+    }
+    acc[date].push(workout);
+    return acc;
+  }, {} as Record<string, Workout[]>);
+  
+  // Debug: Log workout groups
+  console.log('Workout groups:', Object.keys(workoutsByDate));
+  
+  // Sort dates chronologically
+  const sortedDates = Object.keys(workoutsByDate).sort((a, b) => {
+    const dateA = workoutsByDate[a][0].rawDate || new Date();
+    const dateB = workoutsByDate[b][0].rawDate || new Date();
+    return dateA.getTime() - dateB.getTime();
+  });
+  
+  // Debug: Log sorted dates
+  console.log('Sorted dates:', sortedDates);
 
   /**
    * Handle press events on workout cards
@@ -60,15 +94,39 @@ const WorkoutFeed = () => {
       // Clear existing calendar workouts
       setLocalCalendarWorkouts([]);
       
+      // Ensure calendar workouts are shown
+      setShowCalendarWorkouts(true);
+      setCalendarInitialized(true);
+      
       await refreshWorkouts();
       
-      // Update with new workouts
-      setLocalCalendarWorkouts(formattedWorkouts);
-      setCalendarInitialized(true);
-      setShowCalendarWorkouts(true);
+      // Ensure all calendar workouts have proper dates before setting them
+      const workoutsWithDates = formattedWorkouts.map(workout => {
+        if (!workout.date) {
+          // Format the date for any workouts missing it
+          const date = workout.rawDate || new Date();
+          const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+          const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+          workout.date = `${days[date.getDay()]} ${months[date.getMonth()]} ${date.getDate()}`;
+        }
+        return workout;
+      });
       
-      // Show success message
-      Alert.alert('Success', 'Calendar workouts refreshed');
+      console.log('Setting calendar workouts with dates:', workoutsWithDates.map(w => ({ 
+        id: w.id, 
+        title: w.title, 
+        date: w.date 
+      })));
+      
+      // Update with new workouts immediately after they're fetched
+      setLocalCalendarWorkouts(workoutsWithDates);
+      
+      // Show appropriate message based on results
+      if (formattedWorkouts.length > 0) {
+        Alert.alert('Success', `Found ${formattedWorkouts.length} calendar workouts`);
+      } else {
+        Alert.alert('No Workouts Found', 'No workout events were found in your calendar. Try adding more specific workout names to your calendar events.');
+      }
     } catch (err) {
       console.error('Error pulling calendar workouts:', err);
       Alert.alert('Error', 'Failed to pull calendar workouts');
@@ -123,19 +181,29 @@ const WorkoutFeed = () => {
           </TouchableOpacity>
         )}
 
-        {/* Workouts List */}
+        {/* Workouts List Grouped by Date */}
         <View style={styles.workoutList}>
-          {allWorkouts.map((workout) => (
-            <TouchableOpacity
-              key={workout.id}
-              onPress={() => handleWorkoutPress(workout)}
-              style={styles.workoutItem}
-            >
-              <WorkoutCard
-                {...workout}
-                isDark={isDark}
-              />
-            </TouchableOpacity>
+          {sortedDates.map((date) => (
+            <View key={date} style={styles.dateSection}>
+              {/* Date Header */}
+              <Text style={[styles.dateLabel, isDark && { color: '#fff' }]}>
+                {date}
+              </Text>
+              
+              {/* Workouts for this date */}
+              {workoutsByDate[date].map((workout) => (
+                <TouchableOpacity
+                  key={workout.id}
+                  onPress={() => handleWorkoutPress(workout)}
+                  style={styles.workoutItem}
+                >
+                  <WorkoutCard
+                    {...workout}
+                    isDark={isDark}
+                  />
+                </TouchableOpacity>
+              ))}
+            </View>
           ))}
         </View>
       </ScrollView>
@@ -155,14 +223,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   dateSection: {
-    paddingBottom: 16,
+    paddingBottom: 24,
+    marginTop: 16,
   },
   dateLabel: {
-    fontSize: 13,
-    fontWeight: '500',
-    letterSpacing: -0.2,
-    marginBottom: 4,
-    textTransform: 'uppercase',
+    fontSize: 26,
+    fontWeight: '700',
+    letterSpacing: -0.5,
+    marginBottom: 8,
   },
   date: {
     fontSize: 26,
