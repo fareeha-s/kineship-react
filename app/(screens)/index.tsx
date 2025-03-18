@@ -16,7 +16,7 @@ const WorkoutFeed = () => {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
-  const { formattedWorkouts, loading: calendarLoading, error, hasPermission, refreshWorkouts } = useCalendar();
+  const { formattedWorkouts, loading: calendarLoading, error, hasPermission, refreshWorkouts, currentEndDate } = useCalendar();
   const [showCalendarWorkouts, setShowCalendarWorkouts] = useState(false);
   const [calendarInitialized, setCalendarInitialized] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -204,6 +204,20 @@ const WorkoutFeed = () => {
               ))}
             </View>
           ))}
+          
+          {/* Load More Button */}
+          {showCalendarWorkouts && calendarInitialized && (
+            <TouchableOpacity 
+              style={[styles.loadMoreButton, loading && styles.loadMoreButtonDisabled]}
+              onPress={() => refreshWorkouts(true)}
+              disabled={loading}
+            >
+              <Text style={styles.loadMoreButtonText}>
+                {loading ? 'Loading...' : 'Load More Workouts'}
+              </Text>
+              {loading && <ActivityIndicator size="small" color="white" style={styles.smallLoader} />}
+            </TouchableOpacity>
+          )}
         </View>
       </ScrollView>
     </View>
@@ -213,6 +227,25 @@ const WorkoutFeed = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  loadMoreButton: {
+    backgroundColor: '#4F46E5',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 16,
+    marginBottom: 24,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  loadMoreButtonDisabled: {
+    opacity: 0.7,
+  },
+  loadMoreButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    marginRight: 8,
   },
   scrollView: {
     flex: 1,

@@ -2,11 +2,21 @@ import { useState, useEffect } from 'react';
 import * as Calendar from 'expo-calendar';
 import { calendarService } from '../services/calendarService';
 
-export const useCalendar = () => {
+interface UseCalendarReturn {
+  loading: boolean;
+  error: string | null;
+  hasPermission: boolean;
+  formattedWorkouts: any[];
+  refreshWorkouts: (extendRange?: boolean) => Promise<void>;
+  currentEndDate: Date;
+}
+
+export const useCalendar = (): UseCalendarReturn => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasPermission, setHasPermission] = useState(false);
   const [formattedWorkouts, setFormattedWorkouts] = useState<any[]>([]);
+  const [currentEndDate, setCurrentEndDate] = useState<Date>(new Date(new Date().setDate(new Date().getDate() + 14)));
 
   const checkPermissions = async () => {
     try {
@@ -32,7 +42,7 @@ export const useCalendar = () => {
     }
   };
 
-  const refreshWorkouts = async () => {
+  const refreshWorkouts = async (extendRange: boolean = false) => {
     try {
       setLoading(true);
       setError(null);
@@ -44,10 +54,18 @@ export const useCalendar = () => {
         return;
       }
 
-      // Get events for the next 14 days
       const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 14);
+      let endDate;
+      
+      if (extendRange) {
+        // Extend the range by 7 more days
+        endDate = new Date(currentEndDate);
+        endDate.setDate(endDate.getDate() + 7);
+        setCurrentEndDate(endDate);
+      } else {
+        // Use the current end date
+        endDate = currentEndDate;
+      }
 
       const events = await calendarService.getCalendarEvents(startDate, endDate);
       const formatted = events.map(calendarService.formatWorkoutForCard);
@@ -69,6 +87,7 @@ export const useCalendar = () => {
     error,
     hasPermission,
     formattedWorkouts,
-    refreshWorkouts
+    refreshWorkouts,
+    currentEndDate
   };
 };
