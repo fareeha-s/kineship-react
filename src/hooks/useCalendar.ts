@@ -44,10 +44,10 @@ export const useCalendar = () => {
         return;
       }
 
-      // Get events for the next 7 days
+      // Get events for the next 14 days
       const startDate = new Date();
       const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 7);
+      endDate.setDate(endDate.getDate() + 14);
 
       const events = await calendarService.getCalendarEvents(startDate, endDate);
       const formatted = events.map(calendarService.formatWorkoutForCard);
