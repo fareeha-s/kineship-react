@@ -199,12 +199,12 @@ const WorkoutFeed = () => {
       >
         {/* Header Section */}
         <View style={styles.headerSection}>
-          <View style={styles.dateContainer}>
-            <Text style={[styles.date, { color: isDark ? '#ffffff' : '#111827' }]}>{formatDate()}</Text>
+          <View style={styles.emojiContainer}>
+            <Text style={styles.emojiText}>🤸‍♀️ 🏃‍♀️ 💃 🎾 ✨</Text>
           </View>
           <View>
             <TouchableOpacity 
-              style={styles.plusButton}
+              style={[styles.plusButton, { backgroundColor: isDark ? 'rgba(75, 85, 99, 0.8)' : 'rgba(255, 255, 255, 0.8)' }]}
               onPress={() => {
                 setShowMenu(!showMenu);
                 Animated.spring(menuAnimation, {
@@ -213,7 +213,7 @@ const WorkoutFeed = () => {
                 }).start();
               }}
             >
-              <Text style={styles.plusButtonText}>+</Text>
+              <Text style={[styles.plusButtonText, { color: isDark ? 'white' : '#4b5563' }]}>+</Text>
             </TouchableOpacity>
 
             {/* Overlay to dismiss menu */}
@@ -241,7 +241,9 @@ const WorkoutFeed = () => {
                         inputRange: [0, 1],
                         outputRange: [-20, 0]
                       })
-                    }]
+                    }],
+                    backgroundColor: isDark ? 'rgba(30, 41, 59, 0.85)' : 'rgba(255, 255, 255, 0.85)',
+                    borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'
                   }]}
                 >
                   <TouchableOpacity 
@@ -252,7 +254,7 @@ const WorkoutFeed = () => {
                     }}
                     disabled={loading}
                   >
-                    <Text style={styles.menuText}>Pull from Calendar</Text>
+                    <Text style={[styles.menuText, { color: isDark ? 'white' : '#374151' }]}>Pull from Calendar</Text>
                     {loading && <ActivityIndicator size="small" color="#4b5563" style={styles.smallLoader} />}
                   </TouchableOpacity>
                   <TouchableOpacity 
@@ -263,7 +265,7 @@ const WorkoutFeed = () => {
                       Alert.alert('Coming Soon', 'Social workout planning will be available soon!');
                     }}
                   >
-                    <Text style={styles.menuText}>Plan a Social</Text>
+                    <Text style={[styles.menuText, { color: isDark ? 'white' : '#374151' }]}>Plan a Social</Text>
                   </TouchableOpacity>
                 </Animated.View>
               </View>
@@ -374,8 +376,12 @@ const styles = StyleSheet.create({
       default: 0
     }),
   },
-  dateContainer: {
+  emojiContainer: {
     flex: 1,
+  },
+  emojiText: {
+    fontSize: 24,
+    letterSpacing: 2,
   },
   dateSection: {
     paddingBottom: 12,
@@ -393,16 +399,21 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   plusButton: {
-    backgroundColor: '#4b5563',
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   plusButtonText: {
-    color: 'white',
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: '300',
     marginTop: -2,
   },
@@ -413,26 +424,26 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   menu: {
-    backgroundColor: 'white',
-    borderRadius: 8,
-    padding: 4,
+    borderRadius: 12,
+    padding: 6,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 5,
-    minWidth: 160,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 8,
+    minWidth: 180,
+    borderWidth: 1,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 6,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginVertical: 2,
   },
   menuText: {
-    fontSize: 14,
-    color: '#374151',
+    fontSize: 16,
     fontWeight: '500',
   },
   overlay: {
