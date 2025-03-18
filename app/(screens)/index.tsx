@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, useColorScheme, Alert, ActivityIndicator } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, useColorScheme, Alert, ActivityIndicator, Modal, Pressable, Animated } from 'react-native';
 import WorkoutCard from '../../src/components/WorkoutCard';
 import { mockWorkouts } from '../App';
 import { useRouter } from 'expo-router';
@@ -23,6 +23,8 @@ const WorkoutFeed = () => {
   const [showCalendarWorkouts, setShowCalendarWorkouts] = useState(false);
   const [calendarInitialized, setCalendarInitialized] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const menuAnimation = useRef(new Animated.Value(0)).current;
   const [localCalendarWorkouts, setLocalCalendarWorkouts] = useState<Workout[]>([]);
 
   // Combine mock workouts with calendar workouts if enabled
@@ -194,16 +196,73 @@ const WorkoutFeed = () => {
           <View style={styles.dateContainer}>
             <Text style={[styles.date, { color: isDark ? '#ffffff' : '#111827' }]}>{formatDate()}</Text>
           </View>
-          <TouchableOpacity 
-            style={[styles.calendarButton, loading && styles.calendarButtonDisabled]}
-            onPress={handlePullCalendar}
-            disabled={loading}
-          >
-            <Text style={styles.calendarButtonText}>
-              Pull from Calendar
-            </Text>
-            {loading && <ActivityIndicator size="small" color="white" style={styles.smallLoader} />}
-          </TouchableOpacity>
+          <View>
+            <TouchableOpacity 
+              style={styles.plusButton}
+              onPress={() => {
+                setShowMenu(!showMenu);
+                Animated.spring(menuAnimation, {
+                  toValue: showMenu ? 0 : 1,
+                  useNativeDriver: true,
+                }).start();
+              }}
+            >
+              <Text style={styles.plusButtonText}>+</Text>
+            </TouchableOpacity>
+
+            {/* Overlay to dismiss menu */}
+            {showMenu && (
+              <Pressable 
+                style={styles.overlay}
+                onPress={() => {
+                  setShowMenu(false);
+                  Animated.spring(menuAnimation, {
+                    toValue: 0,
+                    useNativeDriver: true,
+                  }).start();
+                }}
+              />
+            )}
+
+            {/* Dropdown Menu */}
+            {showMenu && (
+              <View style={styles.menuContainer}>
+                <Animated.View 
+                  style={[styles.menu, {
+                    opacity: menuAnimation,
+                    transform: [{
+                      translateY: menuAnimation.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [-20, 0]
+                      })
+                    }]
+                  }]}
+                >
+                  <TouchableOpacity 
+                    style={styles.menuItem}
+                    onPress={() => {
+                      setShowMenu(false);
+                      handlePullCalendar();
+                    }}
+                    disabled={loading}
+                  >
+                    <Text style={styles.menuText}>Pull from Calendar</Text>
+                    {loading && <ActivityIndicator size="small" color="#4b5563" style={styles.smallLoader} />}
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={styles.menuItem}
+                    onPress={() => {
+                      setShowMenu(false);
+                      // TODO: Implement social planning
+                      Alert.alert('Coming Soon', 'Social workout planning will be available soon!');
+                    }}
+                  >
+                    <Text style={styles.menuText}>Plan a Social</Text>
+                  </TouchableOpacity>
+                </Animated.View>
+              </View>
+            )}
+          </View>
         </View>
 
         {/* Workouts List Grouped by Date */}
@@ -319,19 +378,56 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: -0.5,
   },
-  calendarButton: {
+  plusButton: {
     backgroundColor: '#4b5563',
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 6,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
-    flexDirection: 'row',
     justifyContent: 'center',
   },
-  calendarButtonText: {
+  plusButtonText: {
     color: 'white',
+    fontSize: 24,
+    fontWeight: '300',
+    marginTop: -2,
+  },
+  menuContainer: {
+    position: 'absolute',
+    top: 40,
+    right: 0,
+    zIndex: 2,
+  },
+  menu: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    padding: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
+    minWidth: 160,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+  },
+  menuText: {
+    fontSize: 14,
+    color: '#374151',
     fontWeight: '500',
-    fontSize: 13,
+  },
+  overlay: {
+    position: 'absolute',
+    top: -100,
+    left: -100,
+    right: -100,
+    bottom: -100,
+    backgroundColor: 'transparent',
   },
 
   toggleButton: {
