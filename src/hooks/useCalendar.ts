@@ -7,7 +7,7 @@ interface UseCalendarReturn {
   error: string | null;
   hasPermission: boolean;
   formattedWorkouts: any[];
-  refreshWorkouts: (extendRange?: boolean) => Promise<void>;
+  refreshWorkouts: () => Promise<any[]>;
   currentEndDate: Date;
 }
 
@@ -42,7 +42,7 @@ export const useCalendar = (): UseCalendarReturn => {
     }
   };
 
-  const refreshWorkouts = async () => {
+  const refreshWorkouts = async (): Promise<any[]> => {
     try {
       setLoading(true);
       setError(null);
@@ -51,7 +51,7 @@ export const useCalendar = (): UseCalendarReturn => {
       const granted = await checkPermissions();
       if (!granted) {
         setError('Calendar permissions not granted');
-        return;
+        return [];
       }
 
       const startDate = new Date();
@@ -65,8 +65,10 @@ export const useCalendar = (): UseCalendarReturn => {
       const events = await calendarService.getCalendarEvents(startDate, endDate);
       const formatted = events.map(calendarService.formatWorkoutForCard);
       setFormattedWorkouts(formatted);
+      return formatted;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch workouts');
+      return [];
     } finally {
       setLoading(false);
     }

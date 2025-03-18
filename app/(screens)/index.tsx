@@ -99,11 +99,11 @@ const WorkoutFeed = () => {
       setShowCalendarWorkouts(true);
       setCalendarInitialized(true);
       
-      // Fetch new workouts
-      await refreshWorkouts();
+      // Fetch new workouts and get them directly
+      const newWorkouts = await refreshWorkouts();
       
       // Ensure all calendar workouts have proper dates before setting them
-      const workoutsWithDates = formattedWorkouts.map(workout => {
+      const workoutsWithDates = newWorkouts.map((workout: any) => {
         if (!workout.date) {
           // Format the date for any workouts missing it
           const date = workout.rawDate || new Date();
@@ -114,7 +114,7 @@ const WorkoutFeed = () => {
         return workout;
       });
       
-      console.log('Setting calendar workouts with dates:', workoutsWithDates.map(w => ({ 
+      console.log('Setting calendar workouts with dates:', workoutsWithDates.map((w: any) => ({ 
         id: w.id, 
         title: w.title, 
         date: w.date 
