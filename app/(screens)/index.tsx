@@ -247,11 +247,14 @@ const WorkoutFeed = () => {
               </Text>
               
               {/* Workouts for this date */}
-              {workoutsByDate[date].map((workout) => (
+              {workoutsByDate[date].map((workout, workoutIndex) => (
                 <TouchableOpacity
                   key={workout.id}
                   onPress={() => handleWorkoutPress(workout)}
-                  style={styles.workoutItem}
+                  style={[
+                    styles.workoutItem,
+                    workoutIndex === workoutsByDate[date].length - 1 && styles.lastWorkoutItem
+                  ]}
                 >
                   <WorkoutCard
                     {...workout}
@@ -314,7 +317,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   dateSection: {
-    paddingBottom: 24,
+    paddingBottom: 16,
     marginTop: 16,
   },
   dateLabel: {
@@ -375,7 +378,10 @@ const styles = StyleSheet.create({
     gap: 1,
   },
   workoutItem: {
-    marginBottom: 16,
+    marginBottom: 8, // Reduced from 16 to 8 for cards within same day
+  },
+  lastWorkoutItem: {
+    marginBottom: 0, // No margin for last card in a day
   },
 });
 
