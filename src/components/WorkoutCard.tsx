@@ -103,6 +103,12 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
     textContent: {
       flex: 1,
       marginLeft: 12,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    mainContent: {
+      flex: 1,
     },
     cardTitle: {
       fontSize: 17, // iOS typical font size
@@ -119,7 +125,7 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
     avatarsRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginTop: 8,
+      marginLeft: 12,
     },
     avatarContainer: {
       marginRight: -8,
@@ -190,18 +196,12 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
             <Text style={{ fontSize: 18 }}>{brandStyle.icon}</Text>
           </View>
           <View style={styles.textContent}>
-            <Text style={styles.cardTitle}>{title}</Text>
-            <Text style={styles.cardSubtitle}>
-              {time} • {location}
-            </Text>
-            
-            {/* Display details like type and intensity */}
-            {(type || intensity) && (
-              <Text style={[styles.cardSubtitle, { marginTop: 4 }]}>
-                {type}{type && intensity ? ' • ' : ''}{intensity}
-                {duration ? ` • ${duration}` : ''}
+            <View style={styles.mainContent}>
+              <Text style={styles.cardTitle}>{title}</Text>
+              <Text style={styles.cardSubtitle}>
+                {time} • {location}
               </Text>
-            )}
+            </View>
             
             {/* Participant avatars */}
             {participants && participants.length > 0 && (
