@@ -1,10 +1,12 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, useColorScheme, Alert, ActivityIndicator, Modal, Pressable, Animated, Platform, StatusBar } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import WorkoutCard from '../../src/components/WorkoutCard';
 import { mockWorkouts } from '../App';
 import { useRouter } from 'expo-router';
 import { useCalendar } from '../../src/hooks/useCalendar';
 import { Feather } from '@expo/vector-icons';
+import { calendarService } from '../../src/services/calendarService'; // Import calendarService
 
 import { Workout } from '../../src/types/workout';
 
@@ -18,8 +20,8 @@ const WorkoutFeed = () => {
   const [visibleWorkouts, setVisibleWorkouts] = useState(5); // Start with 5 workout cards
   const router = useRouter();
   const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-  const { formattedWorkouts, loading: calendarLoading, error, hasPermission, refreshWorkouts } = useCalendar();
+  const [isDark, setIsDark] = useState(colorScheme === 'dark');
+  const { formattedWorkouts, loading: calendarLoading, error, hasPermission, refreshWorkouts, addDeletedWorkout } = useCalendar();
   const [showCalendarWorkouts, setShowCalendarWorkouts] = useState(false);
   const [calendarInitialized, setCalendarInitialized] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -76,6 +78,60 @@ const WorkoutFeed = () => {
       pathname: "/workout/[id]",
       params: { id: workout.id }
     });
+  };
+
+  const handleDeleteWorkout = (workoutId: string) => {
+    // Find the workout to delete
+    const workoutToDelete = allWorkouts.find(workout => workout.id === workoutId);
+    
+    if (!workoutToDelete) {
+      console.log('Workout not found:', workoutId);
+      return;
+    }
+    
+    // Show confirmation dialog before deleting
+    Alert.alert(
+      'Delete Workout',
+      'Are you sure you want to delete this workout?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel'
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              // If it's a calendar workout and has a calendarId, delete it from the calendar
+              if (workoutToDelete.calendarId) {
+                console.log('Deleting calendar event:', workoutToDelete.calendarId);
+                const success = await calendarService.deleteCalendarEvent(workoutToDelete.calendarId);
+                if (!success) {
+                  console.log('Failed to delete calendar event');
+                  Alert.alert('Error', 'Failed to delete the workout from your calendar.');
+                  return;
+                }
+              }
+              
+              // Add the workout ID to the set of deleted workouts in useCalendar
+              addDeletedWorkout(workoutId);
+              
+              // Remove the workout from localCalendarWorkouts
+              setLocalCalendarWorkouts(prev => 
+                prev.filter(workout => workout.id !== workoutId)
+              );
+              
+              // Show success message
+              Alert.alert('Success', 'The workout has been deleted.');
+            } catch (error) {
+              console.error('Error deleting workout:', error);
+              Alert.alert('Error', 'Failed to delete the workout. Please try again.');
+            }
+          }
+        }
+      ]
+    );
   };
 
   /**
@@ -138,7 +194,7 @@ const WorkoutFeed = () => {
         const daysSinceStart = Math.floor((lastWorkoutDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
         setHasReachedEnd(daysSinceStart >= 14);
         
-        Alert.alert('Success', `Found ${workoutsWithDates.length} calendar workouts`);
+        Alert.alert('Success', `Found ${workoutsWithDates.length} calendar workouts including yesterday's workouts`);
       } else {
         Alert.alert('No Workouts Found', 'No workout events were found in your calendar. Try adding more specific workout names to your calendar events.');
       }
@@ -154,8 +210,20 @@ const WorkoutFeed = () => {
   return (
     <View style={[
       styles.container, 
-      { backgroundColor: isDark ? '#000000' : '#f9fafb' }
+      { backgroundColor: isDark ? '#000000' : '#F2F2F7' }
     ]}>
+      {/* Vibrant gradient background overlay */}
+      <LinearGradient
+        colors={isDark 
+          ? ['#1a2f25', '#2d4339', '#1a2f25'] 
+          : ['#FFFFFF', '#E8F3ED', '#FFE5E0']}
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 1}}
+        style={StyleSheet.absoluteFillObject}
+      />
+      
+
+
       <ScrollView 
         style={styles.scrollView} 
         contentContainerStyle={styles.content}
@@ -200,7 +268,7 @@ const WorkoutFeed = () => {
         {/* Header Section */}
         <View style={styles.headerSection}>
           <View style={styles.emojiContainer}>
-            <Text style={styles.emojiText}>🤸‍♀️ 🏃‍♀️ 💃 🎾 ✨</Text>
+            <Text style={[styles.emojiText, { marginTop: 4 }]}>🤸‍♀️🏃‍♀️💃🎾✨</Text>
           </View>
           <View>
             <TouchableOpacity 
@@ -285,28 +353,74 @@ const WorkoutFeed = () => {
             // Only show if we're within our visible workout limit
             if (totalWorkoutsSoFar > visibleWorkouts) return null;
             
+            // Check if this date is today
+            const rawDate = workoutsByDate[date][0].rawDate;
+            const today = new Date();
+            const isToday = rawDate && 
+              rawDate.getDate() === today.getDate() && 
+              rawDate.getMonth() === today.getMonth() && 
+              rawDate.getFullYear() === today.getFullYear();
+            
             return (
             <View key={date} style={styles.dateSection}>
+              {/* Today Label for today's date */}
+              {isToday ? (
+                <Text style={[styles.todayLabel, isDark && { color: '#fff' }]}>
+                  TODAY
+                </Text>
+              ) : (
+                rawDate && (
+                  <Text style={[styles.todayLabel, isDark && { color: '#fff' }]}>
+                    {(() => {
+                      const days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+                      return days[rawDate.getDay()];
+                    })()}
+                  </Text>
+                )
+              )}
               {/* Date Header */}
-              <Text style={[styles.dateLabel, isDark && { color: '#fff' }]}>
-                {date}
-              </Text>
+              <View style={styles.dateHeader}>
+                <Text style={[styles.dateLabel, isDark && { color: '#fff' }, { fontSize: 20 }]}>
+                  {(() => {
+                    if (rawDate) {
+                      const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                      return `${months[rawDate.getMonth()]} ${rawDate.getDate()}`;
+                    }
+                    return date;
+                  })()}
+                </Text>
+              </View>
               
               {/* Workouts for this date */}
               {workoutsByDate[date].map((workout, workoutIndex) => (
-                <TouchableOpacity
+                <View
                   key={workout.id}
-                  onPress={() => handleWorkoutPress(workout)}
                   style={[
                     styles.workoutItem,
                     workoutIndex === workoutsByDate[date].length - 1 && styles.lastWorkoutItem
                   ]}
                 >
-                  <WorkoutCard
-                    {...workout}
-                    isDark={isDark}
-                  />
-                </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => handleWorkoutPress(workout)}
+                    activeOpacity={0.7}
+                    style={{ width: '100%' }}
+                  >
+                    <WorkoutCard
+                      id={workout.id}
+                      title={workout.title}
+                      time={workout.time}
+                      location={workout.location}
+                      participants={workout.participants}
+                      platforms={workout.platforms}
+                      type={workout.type}
+                      intensity={workout.intensity}
+                      duration={workout.duration}
+                      description={workout.description}
+                      isDark={isDark}
+                      onDelete={() => handleDeleteWorkout(workout.id)}
+                    />
+                  </TouchableOpacity>
+                </View>
               ))}
             </View>
           )})}
@@ -333,7 +447,8 @@ const WorkoutFeed = () => {
   );
 };
 
-const styles = StyleSheet.create({
+// Define styles based on the current theme
+const getThemedStyles = (isDark: boolean) => StyleSheet.create({
   loadingMore: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -343,79 +458,82 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '400',
   },
   endText: {
     textAlign: 'center',
     paddingVertical: 20,
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '400',
   },
   container: {
     flex: 1,
-    backgroundColor: 'rgba(245, 245, 247, 0.8)', // Light background with slight transparency
+    paddingTop: Platform.OS === 'ios' ? 20 : (StatusBar.currentHeight || 0),
   },
 
   scrollView: {
     flex: 1,
   },
   content: {
-    paddingTop: Platform.select({
-      ios: 60, // Account for iPhone notch/Dynamic Island
-      android: StatusBar.currentHeight ? StatusBar.currentHeight + 24 : 24,
-      default: 24
-    }),
-    paddingHorizontal: 16,
-    backgroundColor: 'rgba(245, 245, 247, 0.8)', // Light background with slight transparency
+    paddingTop: Platform.OS === 'ios' ? 40 : 24,
+    paddingHorizontal: 24,
+    backgroundColor: 'transparent', // Transparent to show container background
   },
   headerSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24,
-    paddingTop: Platform.select({
-      ios: 4,
-      default: 0
-    }),
+    marginBottom: 0,
+    paddingTop: 0,
   },
   emojiContainer: {
     flex: 1,
+    alignItems: 'flex-start',
+    paddingLeft: 4,
+    justifyContent: 'center',
   },
   emojiText: {
-    fontSize: 36,
-    letterSpacing: 8,
-    textAlign: 'center',
-    marginTop: 10,
-    marginBottom: 10,
+    fontSize: 40,
+    letterSpacing: 0,
+    textAlign: 'left',
+    marginBottom: 0,
   },
   dateSection: {
     paddingBottom: 12,
-    marginTop: 12,
+    marginTop: 16,
+  },
+  dateHeader: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
   },
   dateLabel: {
-    fontSize: 26,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: '500',
     letterSpacing: -0.5,
-    marginBottom: 6,
+    marginBottom: 4,
+    textTransform: 'capitalize',
   },
-  date: {
-    fontSize: 26,
-    fontWeight: '700',
-    letterSpacing: -0.5,
+  dayOfWeek: {
+    fontSize: 15,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    color: isDark ? '#60A5FA' : '#3B82F6',
+    marginBottom: 4,
   },
   plusButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: 6,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    shadowRadius: 3,
+    elevation: 1,
+    borderWidth: 0,
+    backgroundColor: isDark ? '#2C2C2E' : '#FFFFFF',
   },
   plusButtonText: {
     fontSize: 28,
@@ -429,23 +547,29 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   menu: {
-    borderRadius: 12,
-    padding: 6,
+    borderRadius: 20,
+    padding: 8,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 8,
-    minWidth: 180,
-    borderWidth: 1,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 10,
+    minWidth: 200,
+    borderWidth: 0.5,
+    borderColor: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.7)',
+    overflow: 'hidden',
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginVertical: 2,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 16,
+    marginVertical: 4,
+    backgroundColor: isDark ? 'rgba(60, 60, 67, 0.1)' : 'rgba(255, 255, 255, 0.3)',
+    borderWidth: 0.5,
+    borderColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.5)',
+    marginHorizontal: 4,
   },
   menuText: {
     fontSize: 16,
@@ -488,18 +612,33 @@ const styles = StyleSheet.create({
   },
   workoutList: {
     paddingTop: 8,
-    gap: 1,
-    paddingBottom: 40, // Add padding at the bottom for better scrolling experience
+    gap: 8, 
+    paddingBottom: 48,
+    paddingHorizontal: 0,
   },
   workoutItem: {
-    marginBottom: 16, // Increased for stacked effect
-    alignSelf: 'flex-start',
+    marginBottom: 4,
+    alignSelf: 'stretch',
     width: '100%',
-    transform: [{ perspective: 1000 }],
+    backgroundColor: 'transparent'
   },
   lastWorkoutItem: {
     marginBottom: 0, // No margin for last card in a day
   },
+  todayLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    color: isDark ? '#60A5FA' : '#3B82F6',
+    marginBottom: 6,
+    marginTop: 0,
+  },
+
+
 });
+
+// Generate styles based on the current theme
+const styles = getThemedStyles(false); // Default to light theme, we use inline conditionals for dark theme
 
 export default WorkoutFeed;
