@@ -80,12 +80,17 @@ const WorkoutFeed = () => {
     });
   };
 
-  const handleDeleteWorkout = (workoutId: string) => {
+  const handleDeleteWorkout = async (workoutId: string) => {
     // Find the workout to delete
     const workoutToDelete = allWorkouts.find(workout => workout.id === workoutId);
     
     if (!workoutToDelete) {
       console.log('Workout not found:', workoutId);
+      return;
+    }
+    
+    if (!('calendarId' in workoutToDelete)) {
+      console.log('Not a calendar workout:', workoutId);
       return;
     }
     
@@ -400,26 +405,21 @@ const WorkoutFeed = () => {
                     workoutIndex === workoutsByDate[date].length - 1 && styles.lastWorkoutItem
                   ]}
                 >
-                  <TouchableOpacity
+                  <WorkoutCard
+                    id={workout.id}
+                    title={workout.title}
+                    time={workout.time}
+                    location={workout.location}
+                    participants={workout.participants}
+                    platforms={workout.platforms}
+                    type={workout.type}
+                    intensity={workout.intensity}
+                    duration={workout.duration}
+                    description={workout.description}
+                    isDark={isDark}
                     onPress={() => handleWorkoutPress(workout)}
-                    activeOpacity={0.7}
-                    style={{ width: '100%' }}
-                  >
-                    <WorkoutCard
-                      id={workout.id}
-                      title={workout.title}
-                      time={workout.time}
-                      location={workout.location}
-                      participants={workout.participants}
-                      platforms={workout.platforms}
-                      type={workout.type}
-                      intensity={workout.intensity}
-                      duration={workout.duration}
-                      description={workout.description}
-                      isDark={isDark}
-                      onDelete={() => handleDeleteWorkout(workout.id)}
-                    />
-                  </TouchableOpacity>
+                    onDelete={() => handleDeleteWorkout(workout.id)}
+                  />
                 </View>
               ))}
             </View>

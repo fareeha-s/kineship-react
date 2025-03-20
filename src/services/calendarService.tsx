@@ -354,7 +354,30 @@ export const calendarService = {
       type: workoutDetails.type,
       intensity: workoutDetails.intensity,
       duration: workoutDetails.duration,
-      description: workoutDetails.description
+      description: workoutDetails.description,
+      calendarId: workout.id // Store the original calendar event ID
     };
+  },
+
+  /**
+   * Delete a calendar event by its ID
+   * @param {string} eventId - The ID of the calendar event to delete
+   * @returns {Promise<boolean>} True if deletion was successful, false otherwise
+   */
+  deleteCalendarEvent: async (eventId: string): Promise<boolean> => {
+    try {
+      if (!eventId) {
+        console.error('Cannot delete event: No event ID provided');
+        return false;
+      }
+      
+      console.log('Deleting calendar event:', eventId);
+      await Calendar.deleteEventAsync(eventId);
+      console.log('Successfully deleted calendar event:', eventId);
+      return true;
+    } catch (error) {
+      console.error('Error deleting calendar event:', error);
+      return false;
+    }
   }
 };

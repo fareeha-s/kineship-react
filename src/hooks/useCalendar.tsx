@@ -21,7 +21,9 @@ export const useCalendar = () => {
         throw new Error('Calendar permissions not granted');
       }
 
+      // Start from yesterday to ensure at least one extra day is loaded
       const now = new Date();
+      now.setDate(now.getDate() - 1); // Start from yesterday
       const thirtyDaysFromNow = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
       
       const events = await calendarService.getCalendarEvents(now, thirtyDaysFromNow);

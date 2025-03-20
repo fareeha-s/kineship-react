@@ -23,6 +23,7 @@ export interface Workout {
   intensity?: string; // Intensity level (e.g., "Light", "Moderate", "Intense")
   duration?: string; // Duration of workout (e.g., "45 min")
   description?: string; // Detailed description of the workout
+  calendarId?: string; // ID of the original calendar event (if from calendar)
 }
 
 /**
