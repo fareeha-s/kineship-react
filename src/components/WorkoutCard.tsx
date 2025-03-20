@@ -1,5 +1,5 @@
 // src/components/WorkoutCard.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, Platform, Animated, ImageBackground } from 'react-native';
 import { Feather, FontAwesome5 } from '@expo/vector-icons';
 import { Swipeable } from 'react-native-gesture-handler';
@@ -76,6 +76,8 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
   expanded = false,
   onBack,
 }) => {
+  // State to track if the card is being swiped
+  const [isSwiping, setIsSwiping] = useState(false);
   const brandStyle = getBrandStyles(location, isDark);
   
   // iOS-specific styles following Apple's Human Interface Guidelines
@@ -587,11 +589,28 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
         if (Platform.OS === 'ios') {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         }
+        setIsSwiping(true);
+      }}
+      onSwipeableClose={() => {
+        setIsSwiping(false);
+      }}
+      onBegan={() => {
+        setIsSwiping(true);
+      }}
+      onEnded={() => {
+        // Add a small delay before allowing press events again
+        setTimeout(() => {
+          setIsSwiping(false);
+        }, 100);
       }}
       enabled={onDelete !== undefined}
     >
       <TouchableOpacity
-        onPress={onPress}
+        onPress={() => {
+          if (!isSwiping && onPress) {
+            onPress();
+          }
+        }}
         activeOpacity={0.7}
         style={styles.card}
       >

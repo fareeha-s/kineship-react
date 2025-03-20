@@ -28,11 +28,17 @@ const WorkoutFeed = () => {
   const [showMenu, setShowMenu] = useState(false);
   const menuAnimation = useRef(new Animated.Value(0)).current;
   const [localCalendarWorkouts, setLocalCalendarWorkouts] = useState<Workout[]>([]);
+  const [deletedMockWorkoutIds, setDeletedMockWorkoutIds] = useState<string[]>([]);
+
+  // Filter out deleted mock workouts
+  const filteredMockWorkouts = mockWorkouts.filter(workout => 
+    !deletedMockWorkoutIds.includes(workout.id)
+  );
 
   // Combine mock workouts with calendar workouts if enabled
   const allWorkouts = showCalendarWorkouts && calendarInitialized
-    ? [...mockWorkouts, ...localCalendarWorkouts]
-    : mockWorkouts;
+    ? [...filteredMockWorkouts, ...localCalendarWorkouts]
+    : filteredMockWorkouts;
     
   // Debug: Log all workouts with their dates
   console.log('All workouts with dates:', allWorkouts.map(w => ({ 
@@ -80,6 +86,7 @@ const WorkoutFeed = () => {
     });
   };
 
+
   const handleDeleteWorkout = async (workoutId: string) => {
     // Find the workout to delete
     const workoutToDelete = allWorkouts.find(workout => workout.id === workoutId);
@@ -89,10 +96,8 @@ const WorkoutFeed = () => {
       return;
     }
     
-    if (!('calendarId' in workoutToDelete)) {
-      console.log('Not a calendar workout:', workoutId);
-      return;
-    }
+    // Determine if it's a calendar workout or mock workout
+    const isCalendarWorkout = 'calendarId' in workoutToDelete && !!workoutToDelete.calendarId;
     
     // Show confirmation dialog before deleting
     Alert.alert(
@@ -109,7 +114,7 @@ const WorkoutFeed = () => {
           onPress: async () => {
             try {
               // If it's a calendar workout and has a calendarId, delete it from the calendar
-              if (workoutToDelete.calendarId) {
+              if (isCalendarWorkout && workoutToDelete.calendarId) {
                 console.log('Deleting calendar event:', workoutToDelete.calendarId);
                 const success = await calendarService.deleteCalendarEvent(workoutToDelete.calendarId);
                 if (!success) {
@@ -117,15 +122,19 @@ const WorkoutFeed = () => {
                   Alert.alert('Error', 'Failed to delete the workout from your calendar.');
                   return;
                 }
+                
+                // Add the workout ID to the set of deleted workouts in useCalendar
+                addDeletedWorkout(workoutId);
+                
+                // Remove the workout from localCalendarWorkouts
+                setLocalCalendarWorkouts(prev => 
+                  prev.filter(workout => workout.id !== workoutId)
+                );
+              } else {
+                // It's a mock workout - add to deleted mock workouts list
+                console.log('Deleting mock workout:', workoutId);
+                setDeletedMockWorkoutIds(prev => [...prev, workoutId]);
               }
-              
-              // Add the workout ID to the set of deleted workouts in useCalendar
-              addDeletedWorkout(workoutId);
-              
-              // Remove the workout from localCalendarWorkouts
-              setLocalCalendarWorkouts(prev => 
-                prev.filter(workout => workout.id !== workoutId)
-              );
               
               // Show success message
               Alert.alert('Success', 'The workout has been deleted.');
