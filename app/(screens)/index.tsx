@@ -80,10 +80,8 @@ const WorkoutFeed = () => {
    */
   const handleWorkoutPress = (workout: Workout) => {
     // Navigate to workout detail screen for all workouts
-    router.push({
-      pathname: "/workout/[id]",
-      params: { id: workout.id }
-    });
+    console.log('Navigating to workout:', workout.id);
+    router.push(`/workout/${workout.id}`);
   };
 
 

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, Platform, Animated, ImageBackground } from 'react-native';
 import { Feather, FontAwesome5 } from '@expo/vector-icons';
-import { Swipeable } from 'react-native-gesture-handler';
+import { Swipeable, SwipeableProps } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -78,6 +78,8 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
 }) => {
   // State to track if the card is being swiped
   const [isSwiping, setIsSwiping] = useState(false);
+  // Track the swipe distance to determine if it was a meaningful swipe
+  const [swipeDistance, setSwipeDistance] = useState(0);
   const brandStyle = getBrandStyles(location, isDark);
   
   // iOS-specific styles following Apple's Human Interface Guidelines
@@ -357,6 +359,11 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
 
   // Render right actions (delete button) when swiped
   const renderRightActions = (progress: Animated.AnimatedInterpolation<number> | any, dragX: Animated.AnimatedInterpolation<number> | any) => {
+    // Track the swipe distance
+    dragX.addListener(({ value }: { value: number }) => {
+      setSwipeDistance(Math.abs(value));
+    });
+    
     const scale = dragX.interpolate({
       inputRange: [-80, 0],
       outputRange: [1, 0],
@@ -589,25 +596,41 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({
         if (Platform.OS === 'ios') {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         }
+      }}
+      onSwipeableWillOpen={() => {
+        console.log('Swipe will open');
         setIsSwiping(true);
       }}
       onSwipeableClose={() => {
-        setIsSwiping(false);
+        console.log('Swipe closed');
+        // If it was a meaningful swipe, let's wait a bit before allowing press
+        if (swipeDistance > 20) {
+          setTimeout(() => {
+            setIsSwiping(false);
+            setSwipeDistance(0);
+          }, 250);
+        } else {
+          setIsSwiping(false);
+          setSwipeDistance(0);
+        }
       }}
       onBegan={() => {
+        console.log('Swipe began');
         setIsSwiping(true);
       }}
       onEnded={() => {
-        // Add a small delay before allowing press events again
-        setTimeout(() => {
-          setIsSwiping(false);
-        }, 100);
+        console.log('Swipe ended');
+      }}
+      onSwipeableRightWillOpen={() => {
+        setSwipeDistance(100); // Mark as a significant swipe
       }}
       enabled={onDelete !== undefined}
     >
       <TouchableOpacity
         onPress={() => {
-          if (!isSwiping && onPress) {
+          console.log('Card pressed, isSwiping:', isSwiping, 'swipeDistance:', swipeDistance);
+          // Only trigger the press if we're not swiping or it's a very minor swipe
+          if ((!isSwiping || swipeDistance < 5) && onPress) {
             onPress();
           }
         }}
