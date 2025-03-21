@@ -7,7 +7,7 @@ import { Workout } from '../../../src/types/workout';
 import { useCalendar } from '../../../src/hooks/useCalendar';
 
 export default function WorkoutDetailScreen() {
-  const { id } = useLocalSearchParams();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';

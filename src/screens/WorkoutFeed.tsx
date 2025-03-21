@@ -13,7 +13,7 @@ import {
 import WorkoutCard from '../components/WorkoutCard';
 import { mockWorkouts } from '../../app/App';
 import { useRouter } from 'expo-router';
-import { useCalendar, FormattedWorkout } from '../hooks/useCalendar';
+import { useCalendar } from '../hooks/useCalendar';
 import Icon from 'react-native-vector-icons/Feather';
 
 interface Workout {
@@ -51,11 +51,7 @@ const WorkoutFeed = () => {
   });
 
   const handleWorkoutPress = (workout: Workout) => {
-    // Navigate to workout detail screen
-    router.push({
-      pathname: "/workout/[id]",
-      params: { id: workout.id }
-    });
+    router.push(`/workout/${workout.id}`);
   };
   
   const onRefresh = async () => {
