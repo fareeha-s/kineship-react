@@ -27,6 +27,10 @@ interface Workout {
     avatar: string;
   }[];
   platforms: string[];
+  type?: string;
+  intensity?: string;
+  duration?: string;
+  description?: string;
 }
 
 const WorkoutFeed = () => {

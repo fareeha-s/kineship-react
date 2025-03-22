@@ -1,7 +1,7 @@
 import * as Calendar from 'expo-calendar';
 import { Alert } from 'react-native';
 import { WORKOUT_KEYWORDS, PLATFORM_IDENTIFIERS } from '../constants/workouts';
-import { CalendarWorkout, Workout } from '../types/workout';
+import { CalendarWorkout, Workout as WorkoutType } from '../types/workout';
 
 /**
  * Service for handling calendar-related operations
@@ -240,7 +240,7 @@ export const calendarService = {
    * @param {CalendarWorkout} workout - The calendar workout to format
    * @returns {Workout} Formatted workout data for display
    */
-  formatWorkoutForCard: (workout: CalendarWorkout): Workout => {
+  formatWorkoutForCard(workout: CalendarWorkout): WorkoutType {
     const timeString = workout.startDate.toLocaleTimeString([], { 
       hour: 'numeric', 
       minute: '2-digit',
@@ -349,13 +349,15 @@ export const calendarService = {
       date: dateString,
       rawDate: rawDate,
       location: workout.location || 'Home Workout',
-      participants,
-      platforms,
-      type: workoutDetails.type,
-      intensity: workoutDetails.intensity,
-      duration: workoutDetails.duration,
-      description: workoutDetails.description,
-      calendarId: workout.id // Store the original calendar event ID
+      participants: [
+        { id: '1', name: 'You', avatar: 'https://i.pravatar.cc/150?img=1' }
+      ],
+      platforms: ['Calendar'],
+      type: workoutDetails.type || 'Calendar Workout',
+      intensity: workoutDetails.intensity || 'Not specified',
+      duration: workoutDetails.duration || 'Not specified',
+      description: workoutDetails.description || `Workout scheduled for ${dateString}`,
+      calendarId: workout.id
     };
   },
 
@@ -380,4 +382,15 @@ export const calendarService = {
       return false;
     }
   }
-};
+};interface Workout {
+  id: string;
+  title: string;
+  time: string;
+  location: string;
+  participants: {
+    id: string;
+    name: string;
+    avatar: string;
+  }[];
+  platforms: string[];
+}
